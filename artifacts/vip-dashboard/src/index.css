@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -71,16 +71,16 @@
 
   /* Primary (Accent / Amber) */
   --primary: 33 49.3% 56.9%; /* #C8975A */
-  --primary-foreground: 0 0% 5%; /* Dark text on amber button */
+  --primary-foreground: 0 0% 5%;
   
   /* Secondary / Muted */
   --secondary: 0 0% 11%;
-  --secondary-foreground: 30 5% 46%; /* #7A7570 */
+  --secondary-foreground: 30 5% 46%;
   
   --muted: 0 0% 11%;
   --muted-foreground: 30 5% 46%;
 
-  /* Accent (same as primary here) */
+  /* Accent */
   --accent: 33 49.3% 56.9%;
   --accent-foreground: 0 0% 5%;
 
@@ -105,4 +105,9 @@
 
 html {
   color-scheme: dark;
+}
+
+/* Arabic RTL font override — applied only when dir=rtl is active */
+[dir="rtl"] body {
+  font-family: 'Noto Sans Arabic', 'Inter', system-ui, sans-serif;
 }
