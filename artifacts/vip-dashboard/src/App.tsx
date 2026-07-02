@@ -51,11 +51,25 @@ const translations = {
       rejectModify: "Reject / Modify",
       mcpProtocol: "MCP · Model Context Protocol",
     },
+    actionLabels: {
+      "Open Brief": "Open Brief",
+      "Review & Sign": "Review & Sign",
+      "Generate & Send": "Generate & Send",
+      "Reschedule": "Reschedule",
+      "Resolve Conflict": "Resolve Conflict",
+    } as Record<string, string>,
+    urgencyTimes: {
+      "DUE IN 2H": "DUE IN 2H",
+      "TODAY": "TODAY",
+      "3 PM": "3 PM",
+      "OVERDUE": "OVERDUE",
+      "THIS EVE": "THIS EVE",
+    } as Record<string, string>,
     userRole: "Director of Relations",
     toggle: { en: "EN", ar: "AR" },
   },
   ar: {
-    appName: "كونسيرج OS",
+    appName: "كونسيرج أو إس",
     nav: {
       cognitiveScaffold: "الهيكل المعرفي",
       portfolio: "المحفظة",
@@ -96,6 +110,20 @@ const translations = {
       rejectModify: "رفض / تعديل",
       mcpProtocol: "MCP · بروتوكول سياق النموذج",
     },
+    actionLabels: {
+      "Open Brief": "افتح الملف",
+      "Review & Sign": "مراجعة وتوقيع",
+      "Generate & Send": "توليد وإرسال",
+      "Reschedule": "إعادة جدولة",
+      "Resolve Conflict": "حل التعارض",
+    } as Record<string, string>,
+    urgencyTimes: {
+      "DUE IN 2H": "خلال ساعتين",
+      "TODAY": "اليوم",
+      "3 PM": "الساعة 3م",
+      "OVERDUE": "متأخر",
+      "THIS EVE": "هذا المساء",
+    } as Record<string, string>,
     userRole: "مدير العلاقات",
     toggle: { en: "EN", ar: "AR" },
   },
@@ -234,6 +262,8 @@ function AlertCard({
 }) {
   const style = urgencyStyles[card.urgency] ?? urgencyStyles["SCHEDULED"];
   const urgencyLabel = t.urgency[card.urgency] ?? card.urgency;
+  const urgencyTimeLabel = t.urgencyTimes[card.urgencyTime] ?? card.urgencyTime;
+  const actionLabel = t.actionLabels[card.actionLabel] ?? card.actionLabel;
 
   return (
     <div
@@ -254,7 +284,7 @@ function AlertCard({
         <div className="space-y-1.5 flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`font-mono text-[10px] tracking-widest uppercase ${style.badge}`}>
-              {urgencyLabel} <span className="opacity-40 mx-1">·</span> {card.urgencyTime}
+              {urgencyLabel} <span className="opacity-40 mx-1">·</span> {urgencyTimeLabel}
             </span>
             <span className="text-[10px] font-mono text-muted-foreground ms-auto">
               {t.card.confidence(card.confidenceScore)}
@@ -274,7 +304,7 @@ function AlertCard({
             onClick={(e) => { e.stopPropagation(); onSelect(); }}
             className="flex-shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-[13px] px-5 py-4 rounded-sm transition-all shadow-none"
           >
-            {card.actionLabel}
+            {actionLabel}
           </Button>
         )}
       </div>
@@ -333,6 +363,7 @@ function DetailPanel({
 }) {
   const style = urgencyStyles[alert.urgency] ?? urgencyStyles["SCHEDULED"];
   const urgencyLabel = t.urgency[alert.urgency] ?? alert.urgency;
+  const urgencyTimeLabel = t.urgencyTimes[alert.urgencyTime] ?? alert.urgencyTime;
   const [draft, setDraft] = useState(() => getDraftContent(alert));
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -349,7 +380,7 @@ function DetailPanel({
       <div className="flex-shrink-0 flex items-start justify-between px-6 pt-6 pb-4 border-b border-sidebar-border/50">
         <div className="space-y-1 flex-1 min-w-0 pe-4">
           <span className={`font-mono text-[10px] tracking-widest uppercase ${style.badge}`}>
-            {urgencyLabel} <span className="opacity-40 mx-1">·</span> {alert.urgencyTime}
+            {urgencyLabel} <span className="opacity-40 mx-1">·</span> {urgencyTimeLabel}
           </span>
           <h2 className="text-[16px] font-semibold text-foreground tracking-tight leading-snug">
             {alert.clientName}
