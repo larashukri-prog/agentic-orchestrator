@@ -33,6 +33,26 @@ const mcpFeed = [
     urgencyTime: "3 PM",
     actionLabel: "Generate & Send",
   },
+  {
+    id: 4,
+    clientName: "Reeves Capital Group",
+    triggerEvent: "Quarterly portfolio review overdue by 48 hours — principal is travelling",
+    suggestedAction: "Reschedule review call and pre-circulate updated asset summary to the principal's chief of staff",
+    confidenceScore: 81,
+    urgency: "PRIORITY",
+    urgencyTime: "OVERDUE",
+    actionLabel: "Reschedule",
+  },
+  {
+    id: 5,
+    clientName: "Lady Arabella Morrow",
+    triggerEvent: "Spa reservation conflicts with private board dinner — double-booked at 19:00",
+    suggestedAction: "Move spa appointment to morning slot and confirm revised itinerary with estate manager",
+    confidenceScore: 99,
+    urgency: "SCHEDULED",
+    urgencyTime: "THIS EVE",
+    actionLabel: "Resolve Conflict",
+  },
 ];
 
 router.get("/mcp/feed", (_req, res) => {
