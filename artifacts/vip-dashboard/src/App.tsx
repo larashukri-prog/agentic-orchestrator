@@ -485,7 +485,7 @@ function DetailPanel({
               {t.panel.dataSourcesEvaluated}
             </span>
             <div className="divide-y divide-border/20">
-              {alert.dataSources.map((src) => (
+              {(alert.dataSources ?? []).map((src) => (
                 <div key={src.label} className="flex items-center gap-3 py-2">
                   <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${sourceIconColors[src.icon] ?? "bg-muted/60"}`} />
                   <span className={`font-mono text-[9px] tracking-widest uppercase w-[68px] flex-shrink-0 ${style.badge} opacity-70`}>
