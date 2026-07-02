@@ -8,3 +8,4 @@
 
 export * from './healthStatus';
 export * from './mcpAlert';
+export * from './mcpAlertDataSourcesItem';

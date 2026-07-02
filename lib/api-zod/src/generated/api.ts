@@ -29,7 +29,12 @@ export const GetMcpFeedResponseItem = zod.object({
   "confidenceScore": zod.number().describe('Confidence percentage (0-100)'),
   "urgency": zod.string().describe('CRITICAL, PRIORITY, or SCHEDULED'),
   "urgencyTime": zod.string(),
-  "actionLabel": zod.string()
+  "actionLabel": zod.string(),
+  "dataSources": zod.array(zod.object({
+  "label": zod.string().describe('Short category label (e.g. \"CRM\", \"FLIGHT API\")'),
+  "value": zod.string().describe('Human-readable source name'),
+  "icon": zod.string().describe('Icon key identifier')
+}))
 })
 export const GetMcpFeedResponse = zod.array(GetMcpFeedResponseItem)
 

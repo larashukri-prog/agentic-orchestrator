@@ -9,6 +9,15 @@ export interface HealthStatus {
   status: string;
 }
 
+export type McpAlertDataSourcesItem = {
+  /** Short category label (e.g. "CRM", "FLIGHT API") */
+  label: string;
+  /** Human-readable source name */
+  value: string;
+  /** Icon key identifier */
+  icon: string;
+};
+
 export interface McpAlert {
   id: number;
   clientName: string;
@@ -20,5 +29,6 @@ export interface McpAlert {
   urgency: string;
   urgencyTime: string;
   actionLabel: string;
+  dataSources: McpAlertDataSourcesItem[];
 }
 

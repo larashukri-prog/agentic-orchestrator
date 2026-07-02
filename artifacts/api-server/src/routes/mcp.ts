@@ -12,6 +12,12 @@ const mcpFeed = [
     urgency: "CRITICAL",
     urgencyTime: "DUE IN 2H",
     actionLabel: "Open Brief",
+    dataSources: [
+      { label: "CRM", value: "VIP Profile & Visit History", icon: "crm" },
+      { label: "FLIGHT API", value: "Delta Airlines Live Status", icon: "flight" },
+      { label: "LOGISTICS", value: "Ground Transport Coordinator", icon: "transport" },
+      { label: "SECURITY", value: "Advance Team Briefing System", icon: "security" },
+    ],
   },
   {
     id: 2,
@@ -22,6 +28,12 @@ const mcpFeed = [
     urgency: "PRIORITY",
     urgencyTime: "TODAY",
     actionLabel: "Review & Sign",
+    dataSources: [
+      { label: "CRM", value: "Donor Engagement History", icon: "crm" },
+      { label: "FINANCE", value: "Q4 Reporting System", icon: "finance" },
+      { label: "EMAIL", value: "Outreach Engagement Analytics", icon: "email" },
+      { label: "REGISTRY", value: "Foundation Preference Profiles", icon: "registry" },
+    ],
   },
   {
     id: 3,
@@ -32,6 +44,12 @@ const mcpFeed = [
     urgency: "SCHEDULED",
     urgencyTime: "3 PM",
     actionLabel: "Generate & Send",
+    dataSources: [
+      { label: "CALENDAR", value: "Board Governance Scheduler", icon: "calendar" },
+      { label: "ENCRYPTION", value: "Secure Document Delivery System", icon: "security" },
+      { label: "PROFILES", value: "Member Preference Registry", icon: "registry" },
+      { label: "COMPLIANCE", value: "Audit Trail & Access Log", icon: "compliance" },
+    ],
   },
   {
     id: 4,
@@ -42,6 +60,12 @@ const mcpFeed = [
     urgency: "PRIORITY",
     urgencyTime: "OVERDUE",
     actionLabel: "Reschedule",
+    dataSources: [
+      { label: "PORTFOLIO", value: "Asset Management Platform", icon: "finance" },
+      { label: "TRAVEL", value: "Principal Travel Intelligence API", icon: "flight" },
+      { label: "CRM", value: "Activity & Interaction Log", icon: "crm" },
+      { label: "COMMS", value: "Chief of Staff Message Thread", icon: "email" },
+    ],
   },
   {
     id: 5,
@@ -52,6 +76,12 @@ const mcpFeed = [
     urgency: "SCHEDULED",
     urgencyTime: "THIS EVE",
     actionLabel: "Resolve Conflict",
+    dataSources: [
+      { label: "CALENDAR", value: "Conflict Detection Engine", icon: "calendar" },
+      { label: "ESTATE", value: "Estate Management System", icon: "registry" },
+      { label: "VENUES", value: "Reservation & Booking API", icon: "transport" },
+      { label: "ITINERARY", value: "Personal Schedule Tracker", icon: "compliance" },
+    ],
   },
 ];
 

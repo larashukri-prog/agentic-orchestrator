@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { McpAlertDataSourcesItem } from './mcpAlertDataSourcesItem';
 
 export interface McpAlert {
   id: number;
@@ -17,4 +18,5 @@ export interface McpAlert {
   urgency: string;
   urgencyTime: string;
   actionLabel: string;
+  dataSources: McpAlertDataSourcesItem[];
 }

@@ -61,6 +61,7 @@ components:
         - urgency
         - urgencyTime
         - actionLabel
+        - dataSources
       properties:
         id:
           type: integer
@@ -80,3 +81,21 @@ components:
           type: string
         actionLabel:
           type: string
+        dataSources:
+          type: array
+          items:
+            type: object
+            required:
+              - label
+              - value
+              - icon
+            properties:
+              label:
+                type: string
+                description: Short category label (e.g. "CRM", "FLIGHT API")
+              value:
+                type: string
+                description: Human-readable source name
+              icon:
+                type: string
+                description: Icon key identifier

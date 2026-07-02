@@ -43,6 +43,10 @@ const translations = {
     },
     panel: {
       suggestedAction: "Suggested Action",
+      evalLiteracy: "Eval Literacy",
+      chainOfThought: "Chain of Thought · AI Reasoning Transparency",
+      confidence: "Confidence",
+      dataSourcesEvaluated: "Data Sources Evaluated",
       draftCommunication: "Draft Communication",
       mcpConfidence: (n: number) => `${n}% MCP confidence`,
       approveExecute: "Approve & Execute",
@@ -102,6 +106,10 @@ const translations = {
     },
     panel: {
       suggestedAction: "الإجراء المقترح",
+      evalLiteracy: "شفافية التقييم",
+      chainOfThought: "سلسلة التفكير · شفافية استدلال الذكاء الاصطناعي",
+      confidence: "الثقة",
+      dataSourcesEvaluated: "مصادر البيانات المُقيَّمة",
       draftCommunication: "مسودة التواصل",
       mcpConfidence: (n: number) => `ثقة MCP ${n}٪`,
       approveExecute: "موافقة وتنفيذ",
@@ -143,10 +151,22 @@ const navItemDefs = [
 
 /* ─── Urgency styles ──────────────────────────────────────────────────────── */
 
-const urgencyStyles: Record<string, { accent: string; badge: string; dot: string }> = {
-  CRITICAL:  { accent: "bg-[#C8975A]", badge: "text-[#C8975A]", dot: "bg-[#C8975A]" },
-  PRIORITY:  { accent: "bg-[#A67B48]", badge: "text-[#A67B48]", dot: "bg-[#A67B48]" },
-  SCHEDULED: { accent: "bg-[#7A7570]", badge: "text-[#7A7570]", dot: "bg-[#7A7570]" },
+const urgencyStyles: Record<string, { accent: string; badge: string; dot: string; gauge: string }> = {
+  CRITICAL:  { accent: "bg-[#C8975A]", badge: "text-[#C8975A]", dot: "bg-[#C8975A]", gauge: "text-[#C8975A]" },
+  PRIORITY:  { accent: "bg-[#A67B48]", badge: "text-[#A67B48]", dot: "bg-[#A67B48]", gauge: "text-[#A67B48]" },
+  SCHEDULED: { accent: "bg-[#7A7570]", badge: "text-[#7A7570]", dot: "bg-[#7A7570]", gauge: "text-[#7A7570]" },
+};
+
+const sourceIconColors: Record<string, string> = {
+  crm:        "bg-blue-400/60",
+  flight:     "bg-amber-400/60",
+  transport:  "bg-teal-400/60",
+  security:   "bg-orange-400/60",
+  finance:    "bg-emerald-400/60",
+  email:      "bg-indigo-400/60",
+  registry:   "bg-purple-400/60",
+  calendar:   "bg-cyan-400/60",
+  compliance: "bg-rose-400/60",
 };
 
 /* ─── Draft content ───────────────────────────────────────────────────────── */
@@ -348,6 +368,36 @@ function AlertCard({
 
 /* ─── DetailPanel ─────────────────────────────────────────────────────────── */
 
+/* ─── Confidence gauge SVG ────────────────────────────────────────────────── */
+
+function ConfidenceGauge({ score, gaugeColor }: { score: number; gaugeColor: string }) {
+  const r = 22;
+  const cx = 28;
+  const cy = 28;
+  const halfCirc = Math.PI * r;
+  const filled = (score / 100) * halfCirc;
+  const path = `M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`;
+
+  return (
+    <div className="relative flex flex-col items-center justify-end" style={{ width: 56, height: 38 }}>
+      <svg
+        width="56"
+        height="26"
+        viewBox="0 2 56 26"
+        className="absolute top-0"
+        style={{ overflow: "visible" }}
+      >
+        <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" className="text-white/10" />
+        <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor"
+          strokeDasharray={`${filled} ${halfCirc}`} className={gaugeColor} />
+      </svg>
+      <span className="relative font-mono text-[14px] font-bold text-foreground leading-none">
+        {score}<span className="text-[9px] font-normal opacity-50 ms-0.5">%</span>
+      </span>
+    </div>
+  );
+}
+
 function DetailPanel({
   alert,
   onClose,
@@ -409,7 +459,46 @@ function DetailPanel({
           </p>
         </div>
 
-        <div className="h-px bg-border/40" />
+        {/* ── Eval Literacy trust block ─────────────────── */}
+        <div className="rounded-sm border border-border/40 bg-background/40 overflow-hidden">
+          {/* Header row: label left, gauge right */}
+          <div className="flex items-end justify-between gap-4 px-4 pt-4 pb-3 border-b border-border/25">
+            <div className="space-y-1 min-w-0">
+              <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground/60">
+                {t.panel.evalLiteracy}
+              </span>
+              <p className="text-[10px] text-muted-foreground/35 leading-snug">
+                {t.panel.chainOfThought}
+              </p>
+            </div>
+            <div className="flex-shrink-0 flex flex-col items-center gap-1">
+              <ConfidenceGauge score={alert.confidenceScore} gaugeColor={style.gauge} />
+              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35">
+                {t.panel.confidence}
+              </span>
+            </div>
+          </div>
+
+          {/* Data sources list */}
+          <div className="px-4 pt-3 pb-2">
+            <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35 block mb-2.5">
+              {t.panel.dataSourcesEvaluated}
+            </span>
+            <div className="divide-y divide-border/20">
+              {alert.dataSources.map((src) => (
+                <div key={src.label} className="flex items-center gap-3 py-2">
+                  <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${sourceIconColors[src.icon] ?? "bg-muted/60"}`} />
+                  <span className={`font-mono text-[9px] tracking-widest uppercase w-[68px] flex-shrink-0 ${style.badge} opacity-70`}>
+                    {src.label}
+                  </span>
+                  <span className="text-[11px] text-foreground/60 leading-snug truncate">
+                    {src.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
