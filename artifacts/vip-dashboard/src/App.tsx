@@ -29,9 +29,9 @@ const translations = {
         `${n} item${n !== 1 ? "s" : ""} in queue`,
     },
     urgency: {
-      CRITICAL: "CRITICAL",
-      PRIORITY: "PRIORITY",
-      SCHEDULED: "SCHEDULED",
+      high: "HIGH",
+      medium: "MEDIUM",
+      low: "LOW",
     } as Record<string, string>,
     card: {
       confidence: (n: number) => `${n}% confidence`,
@@ -43,8 +43,10 @@ const translations = {
     },
     panel: {
       suggestedAction: "Suggested Action",
+      tier: "Client Tier",
       evalLiteracy: "Eval Literacy",
       chainOfThought: "Chain of Thought · AI Reasoning Transparency",
+      reasoningSteps: "Reasoning Steps",
       confidence: "Confidence",
       dataSourcesEvaluated: "Data Sources Evaluated",
       draftCommunication: "Draft Communication",
@@ -55,19 +57,10 @@ const translations = {
       rejectModify: "Reject / Modify",
       mcpProtocol: "MCP · Model Context Protocol",
     },
-    actionLabels: {
-      "Open Brief": "Open Brief",
-      "Review & Sign": "Review & Sign",
-      "Generate & Send": "Generate & Send",
-      "Reschedule": "Reschedule",
-      "Resolve Conflict": "Resolve Conflict",
-    } as Record<string, string>,
-    urgencyTimes: {
-      "DUE IN 2H": "DUE IN 2H",
-      "TODAY": "TODAY",
-      "3 PM": "3 PM",
-      "OVERDUE": "OVERDUE",
-      "THIS EVE": "THIS EVE",
+    urgencyAction: {
+      high: "Take Action",
+      medium: "Review",
+      low: "Open",
     } as Record<string, string>,
     userRole: "Director of Relations",
     toggle: { en: "EN", ar: "AR" },
@@ -92,9 +85,9 @@ const translations = {
         `${n} ${n === 1 ? "بند" : "بنود"} في قائمة الانتظار`,
     },
     urgency: {
-      CRITICAL: "حرج",
-      PRIORITY: "أولوية",
-      SCHEDULED: "مجدول",
+      high: "عالٍ",
+      medium: "متوسط",
+      low: "منتظم",
     } as Record<string, string>,
     card: {
       confidence: (n: number) => `ثقة ${n}٪`,
@@ -106,8 +99,10 @@ const translations = {
     },
     panel: {
       suggestedAction: "الإجراء المقترح",
+      tier: "المستوى",
       evalLiteracy: "شفافية التقييم",
       chainOfThought: "سلسلة التفكير · شفافية استدلال الذكاء الاصطناعي",
+      reasoningSteps: "خطوات الاستدلال",
       confidence: "الثقة",
       dataSourcesEvaluated: "مصادر البيانات المُقيَّمة",
       draftCommunication: "مسودة التواصل",
@@ -118,19 +113,10 @@ const translations = {
       rejectModify: "رفض / تعديل",
       mcpProtocol: "MCP · بروتوكول سياق النموذج",
     },
-    actionLabels: {
-      "Open Brief": "افتح الملف",
-      "Review & Sign": "مراجعة وتوقيع",
-      "Generate & Send": "توليد وإرسال",
-      "Reschedule": "إعادة جدولة",
-      "Resolve Conflict": "حل التعارض",
-    } as Record<string, string>,
-    urgencyTimes: {
-      "DUE IN 2H": "خلال ساعتين",
-      "TODAY": "اليوم",
-      "3 PM": "الساعة 3م",
-      "OVERDUE": "متأخر",
-      "THIS EVE": "هذا المساء",
+    urgencyAction: {
+      high: "اتخاذ إجراء",
+      medium: "مراجعة",
+      low: "فتح",
     } as Record<string, string>,
     userRole: "مدير العلاقات",
     toggle: { en: "EN", ar: "AR" },
@@ -152,116 +138,10 @@ const navItemDefs = [
 /* ─── Urgency styles ──────────────────────────────────────────────────────── */
 
 const urgencyStyles: Record<string, { accent: string; badge: string; dot: string; gauge: string }> = {
-  CRITICAL:  { accent: "bg-[#C8975A]", badge: "text-[#C8975A]", dot: "bg-[#C8975A]", gauge: "text-[#C8975A]" },
-  PRIORITY:  { accent: "bg-[#A67B48]", badge: "text-[#A67B48]", dot: "bg-[#A67B48]", gauge: "text-[#A67B48]" },
-  SCHEDULED: { accent: "bg-[#7A7570]", badge: "text-[#7A7570]", dot: "bg-[#7A7570]", gauge: "text-[#7A7570]" },
+  high:   { accent: "bg-[#C8975A]", badge: "text-[#C8975A]", dot: "bg-[#C8975A]", gauge: "text-[#C8975A]" },
+  medium: { accent: "bg-[#A67B48]", badge: "text-[#A67B48]", dot: "bg-[#A67B48]", gauge: "text-[#A67B48]" },
+  low:    { accent: "bg-[#7A7570]", badge: "text-[#7A7570]", dot: "bg-[#7A7570]", gauge: "text-[#7A7570]" },
 };
-
-const sourceIconColors: Record<string, string> = {
-  crm:        "bg-blue-400/60",
-  flight:     "bg-amber-400/60",
-  transport:  "bg-teal-400/60",
-  security:   "bg-orange-400/60",
-  finance:    "bg-emerald-400/60",
-  email:      "bg-indigo-400/60",
-  registry:   "bg-purple-400/60",
-  calendar:   "bg-cyan-400/60",
-  compliance: "bg-rose-400/60",
-};
-
-/* ─── Draft content ───────────────────────────────────────────────────────── */
-
-function getDraftContent(alert: McpAlert): string {
-  const drafts: Record<number, string> = {
-    1: `Subject: Revised Arrival Arrangements — ${alert.clientName}
-
-Ambassador,
-
-We have been notified of a 2-hour delay to your flight, with a revised ETA of 21:40. Your Presidential Suite upgrade has been confirmed and the advance team is standing by.
-
-Actions taken:
-— Motorcade brief redistributed to all ground personnel
-— Suite prepared for late arrival; in-room service on standby
-— Venue security briefed on revised timeline
-
-Please advise of any further requirements.
-
-Warm regards,
-J. Doe
-Director of Relations`,
-
-    2: `Subject: Q4 Impact Report & Year-End Partnership Note
-
-Dear ${alert.clientName},
-
-As the Q4 engagement window draws to a close, I wanted to reach out personally with our impact report and express gratitude for your continued partnership.
-
-Enclosed highlights:
-— Programme reach expanded 34% year-over-year
-— Three new initiatives fully funded through your contribution
-— Full financial transparency annex attached
-
-I would welcome the opportunity to discuss outcomes and explore alignment for the year ahead. Please let me know your availability.
-
-With gratitude,
-J. Doe
-Director of Relations`,
-
-    3: `Subject: Governance Session — Encrypted Agenda Packet
-
-Dear Board Members,
-
-Your confidential agenda packets for today's governance session at 3:00 PM are enclosed. Decryption credentials have been transmitted via separate secure channel.
-
-Agenda covers:
-— Q4 financial review and forward projections
-— Strategic initiative approvals (3 items)
-— Governance policy amendments
-
-Please confirm receipt. The session commences at 3:00 PM.
-
-Regards,
-J. Doe
-Director of Relations`,
-
-    4: `Subject: Rescheduled — Quarterly Portfolio Review
-
-Dear ${alert.clientName} team,
-
-Given the principal's travel schedule, we have rescheduled the quarterly portfolio review. An updated asset summary is attached for advance review.
-
-— Revised review call: to be confirmed
-— Asset summary pre-circulated to the chief of staff
-— All materials encrypted and access-controlled
-
-Please confirm the rescheduled slot at your earliest convenience.
-
-Best,
-J. Doe
-Director of Relations`,
-
-    5: `Subject: Revised Itinerary — ${alert.clientName}
-
-Dear Estate Manager,
-
-We have identified a scheduling conflict at 19:00 and have resolved it as follows:
-
-— Spa appointment moved to 09:30 (morning slot confirmed)
-— Private board dinner itinerary unchanged at 19:00
-— Revised itinerary attached for your records
-
-Please confirm receipt and advise of any further adjustments required.
-
-Regards,
-J. Doe
-Director of Relations`,
-  };
-
-  return (
-    drafts[alert.id] ??
-    `Subject: Action Required — ${alert.clientName}\n\n${alert.suggestedAction}\n\nRegards,\nJ. Doe\nDirector of Relations`
-  );
-}
 
 /* ─── AlertCard ───────────────────────────────────────────────────────────── */
 
@@ -280,10 +160,9 @@ function AlertCard({
   isPanelOpen: boolean;
   t: T;
 }) {
-  const style = urgencyStyles[card.urgency] ?? urgencyStyles["SCHEDULED"];
-  const urgencyLabel = t.urgency[card.urgency] ?? card.urgency;
-  const urgencyTimeLabel = t.urgencyTimes[card.urgencyTime] ?? card.urgencyTime;
-  const actionLabel = t.actionLabels[card.actionLabel] ?? card.actionLabel;
+  const style = urgencyStyles[card.urgency] ?? urgencyStyles["low"];
+  const urgencyLabel = t.urgency[card.urgency] ?? card.urgency.toUpperCase();
+  const ctaLabel = t.urgencyAction[card.urgency] ?? "Review";
 
   return (
     <div
@@ -297,14 +176,14 @@ function AlertCard({
         ${isPanelOpen ? "p-4" : "p-6"}
       `}
     >
-      {/* Accent strip — uses logical start so it flips in RTL */}
+      {/* Accent strip — logical start flips automatically in RTL */}
       <div className={`absolute inset-y-0 start-0 w-[2px] ${style.accent}`} />
 
       <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1.5 flex-1 min-w-0">
+        <div className="space-y-1 flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`font-mono text-[10px] tracking-widest uppercase ${style.badge}`}>
-              {urgencyLabel} <span className="opacity-40 mx-1">·</span> {urgencyTimeLabel}
+              {urgencyLabel}
             </span>
             <span className="text-[10px] font-mono text-muted-foreground ms-auto">
               {t.card.confidence(card.confidenceScore)}
@@ -316,6 +195,9 @@ function AlertCard({
           >
             {card.clientName}
           </h3>
+          <p className="font-mono text-[10px] text-muted-foreground/45 tracking-wide truncate">
+            {card.tier}
+          </p>
         </div>
 
         {!isPanelOpen && (
@@ -324,7 +206,7 @@ function AlertCard({
             onClick={(e) => { e.stopPropagation(); onSelect(); }}
             className="flex-shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-[13px] px-5 py-4 rounded-sm transition-all shadow-none"
           >
-            {actionLabel}
+            {ctaLabel}
           </Button>
         )}
       </div>
@@ -411,14 +293,13 @@ function DetailPanel({
   approvalState: ApprovalState;
   t: T;
 }) {
-  const style = urgencyStyles[alert.urgency] ?? urgencyStyles["SCHEDULED"];
-  const urgencyLabel = t.urgency[alert.urgency] ?? alert.urgency;
-  const urgencyTimeLabel = t.urgencyTimes[alert.urgencyTime] ?? alert.urgencyTime;
-  const [draft, setDraft] = useState(() => getDraftContent(alert));
+  const style = urgencyStyles[alert.urgency] ?? urgencyStyles["low"];
+  const urgencyLabel = t.urgency[alert.urgency] ?? alert.urgency.toUpperCase();
+  const [draft, setDraft] = useState(() => alert.actionPayload);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    setDraft(getDraftContent(alert));
+    setDraft(alert.actionPayload);
   }, [alert.id]);
 
   return (
@@ -430,11 +311,14 @@ function DetailPanel({
       <div className="flex-shrink-0 flex items-start justify-between px-6 pt-6 pb-4 border-b border-sidebar-border/50">
         <div className="space-y-1 flex-1 min-w-0 pe-4">
           <span className={`font-mono text-[10px] tracking-widest uppercase ${style.badge}`}>
-            {urgencyLabel} <span className="opacity-40 mx-1">·</span> {urgencyTimeLabel}
+            {urgencyLabel}
           </span>
           <h2 className="text-[16px] font-semibold text-foreground tracking-tight leading-snug">
             {alert.clientName}
           </h2>
+          <p className="font-mono text-[10px] text-muted-foreground/45 tracking-wide">
+            {alert.tier}
+          </p>
           <p className="text-[12px] text-muted-foreground leading-relaxed">
             {alert.triggerEvent}
           </p>
@@ -479,21 +363,33 @@ function DetailPanel({
             </div>
           </div>
 
+          {/* Reasoning steps */}
+          <div className="px-4 pt-3 pb-2 border-b border-border/25">
+            <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35 block mb-2.5">
+              {t.panel.reasoningSteps}
+            </span>
+            <ol className="space-y-2">
+              {(alert.chainOfThought ?? []).map((step, i) => (
+                <li key={i} className="flex gap-2.5 items-start">
+                  <span className={`font-mono text-[9px] font-bold leading-none mt-[3px] flex-shrink-0 tabular-nums ${style.badge} opacity-60`}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-[11px] text-foreground/65 leading-snug">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
           {/* Data sources list */}
-          <div className="px-4 pt-3 pb-2">
+          <div className="px-4 pt-3 pb-3">
             <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35 block mb-2.5">
               {t.panel.dataSourcesEvaluated}
             </span>
             <div className="divide-y divide-border/20">
-              {(alert.dataSources ?? []).map((src) => (
-                <div key={src.label} className="flex items-center gap-3 py-2">
-                  <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${sourceIconColors[src.icon] ?? "bg-muted/60"}`} />
-                  <span className={`font-mono text-[9px] tracking-widest uppercase w-[68px] flex-shrink-0 ${style.badge} opacity-70`}>
-                    {src.label}
-                  </span>
-                  <span className="text-[11px] text-foreground/60 leading-snug truncate">
-                    {src.value}
-                  </span>
+              {(alert.dataSourcesEvaluated ?? []).map((src, i) => (
+                <div key={i} className="flex items-center gap-2.5 py-2">
+                  <div className={`w-1 h-1 rounded-full flex-shrink-0 ${style.dot} opacity-50`} />
+                  <span className="text-[11px] text-foreground/60 leading-snug">{src}</span>
                 </div>
               ))}
             </div>
@@ -607,8 +503,8 @@ export default function App() {
 
   const { data: allAlerts, isLoading, isError } = useGetMcpFeed();
 
-  const [dismissedIds, setDismissedIds] = useState<Set<number>>(new Set());
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [approvalState, setApprovalState] = useState<ApprovalState>("idle");
 
   const activeAlerts = (allAlerts ?? []).filter((a) => !dismissedIds.has(a.id));
@@ -616,7 +512,7 @@ export default function App() {
   const selectedAlert = visibleAlerts.find((a) => a.id === selectedId) ?? null;
   const panelOpen = selectedAlert !== null;
 
-  function handleSelect(id: number) {
+  function handleSelect(id: string) {
     if (approvalState !== "idle") return;
     setSelectedId((prev) => (prev === id ? null : id));
     setApprovalState("idle");

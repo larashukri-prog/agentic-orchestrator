@@ -31,7 +31,7 @@ paths:
       operationId: getMcpFeed
       tags: [mcp]
       summary: MCP alert feed
-      description: Returns simulated Model Context Protocol alert data for VIP management
+      description: Returns Model Context Protocol alert data for VIP management
       responses:
         "200":
           description: MCP alert feed
@@ -55,18 +55,22 @@ components:
       required:
         - id
         - clientName
+        - tier
         - triggerEvent
         - suggestedAction
         - confidenceScore
         - urgency
-        - urgencyTime
-        - actionLabel
-        - dataSources
+        - dataSourcesEvaluated
+        - chainOfThought
+        - actionPayload
       properties:
         id:
-          type: integer
+          type: string
         clientName:
           type: string
+        tier:
+          type: string
+          description: Client relationship tier
         triggerEvent:
           type: string
         suggestedAction:
@@ -76,26 +80,17 @@ components:
           description: Confidence percentage (0-100)
         urgency:
           type: string
-          description: "CRITICAL, PRIORITY, or SCHEDULED"
-        urgencyTime:
-          type: string
-        actionLabel:
-          type: string
-        dataSources:
+          description: "high, medium, or low"
+        dataSourcesEvaluated:
           type: array
           items:
-            type: object
-            required:
-              - label
-              - value
-              - icon
-            properties:
-              label:
-                type: string
-                description: Short category label (e.g. "CRM", "FLIGHT API")
-              value:
-                type: string
-                description: Human-readable source name
-              icon:
-                type: string
-                description: Icon key identifier
+            type: string
+          description: Data sources evaluated to generate this recommendation
+        chainOfThought:
+          type: array
+          items:
+            type: string
+          description: AI reasoning steps that led to this recommendation
+        actionPayload:
+          type: string
+          description: Pre-drafted communication to send

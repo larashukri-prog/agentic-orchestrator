@@ -134,7 +134,7 @@ export const getGetMcpFeedUrl = () => {
 }
 
 /**
- * Returns simulated Model Context Protocol alert data for VIP management
+ * Returns Model Context Protocol alert data for VIP management
  * @summary MCP alert feed
  */
 export const getMcpFeed = async ( options?: RequestInit): Promise<McpAlert[]> => {

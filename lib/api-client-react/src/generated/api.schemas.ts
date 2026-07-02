@@ -9,26 +9,22 @@ export interface HealthStatus {
   status: string;
 }
 
-export type McpAlertDataSourcesItem = {
-  /** Short category label (e.g. "CRM", "FLIGHT API") */
-  label: string;
-  /** Human-readable source name */
-  value: string;
-  /** Icon key identifier */
-  icon: string;
-};
-
 export interface McpAlert {
-  id: number;
+  id: string;
   clientName: string;
+  /** Client relationship tier */
+  tier: string;
   triggerEvent: string;
   suggestedAction: string;
   /** Confidence percentage (0-100) */
   confidenceScore: number;
-  /** CRITICAL, PRIORITY, or SCHEDULED */
+  /** high, medium, or low */
   urgency: string;
-  urgencyTime: string;
-  actionLabel: string;
-  dataSources: McpAlertDataSourcesItem[];
+  /** Data sources evaluated to generate this recommendation */
+  dataSourcesEvaluated: string[];
+  /** AI reasoning steps that led to this recommendation */
+  chainOfThought: string[];
+  /** Pre-drafted communication to send */
+  actionPayload: string;
 }
 

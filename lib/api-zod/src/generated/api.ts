@@ -18,23 +18,20 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * Returns simulated Model Context Protocol alert data for VIP management
+ * Returns Model Context Protocol alert data for VIP management
  * @summary MCP alert feed
  */
 export const GetMcpFeedResponseItem = zod.object({
-  "id": zod.number(),
+  "id": zod.string(),
   "clientName": zod.string(),
+  "tier": zod.string().describe('Client relationship tier'),
   "triggerEvent": zod.string(),
   "suggestedAction": zod.string(),
   "confidenceScore": zod.number().describe('Confidence percentage (0-100)'),
-  "urgency": zod.string().describe('CRITICAL, PRIORITY, or SCHEDULED'),
-  "urgencyTime": zod.string(),
-  "actionLabel": zod.string(),
-  "dataSources": zod.array(zod.object({
-  "label": zod.string().describe('Short category label (e.g. \"CRM\", \"FLIGHT API\")'),
-  "value": zod.string().describe('Human-readable source name'),
-  "icon": zod.string().describe('Icon key identifier')
-}))
+  "urgency": zod.string().describe('high, medium, or low'),
+  "dataSourcesEvaluated": zod.array(zod.string()).describe('Data sources evaluated to generate this recommendation'),
+  "chainOfThought": zod.array(zod.string()).describe('AI reasoning steps that led to this recommendation'),
+  "actionPayload": zod.string().describe('Pre-drafted communication to send')
 })
 export const GetMcpFeedResponse = zod.array(GetMcpFeedResponseItem)
 
