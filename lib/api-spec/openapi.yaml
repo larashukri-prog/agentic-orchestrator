@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: mcp
+    description: Model Context Protocol data feed
 paths:
   /healthz:
     get:
@@ -24,6 +26,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /mcp/feed:
+    get:
+      operationId: getMcpFeed
+      tags: [mcp]
+      summary: MCP alert feed
+      description: Returns simulated Model Context Protocol alert data for VIP management
+      responses:
+        "200":
+          description: MCP alert feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/McpAlert"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +50,33 @@ components:
           type: string
       required:
         - status
-
+    McpAlert:
+      type: object
+      required:
+        - id
+        - clientName
+        - triggerEvent
+        - suggestedAction
+        - confidenceScore
+        - urgency
+        - urgencyTime
+        - actionLabel
+      properties:
+        id:
+          type: integer
+        clientName:
+          type: string
+        triggerEvent:
+          type: string
+        suggestedAction:
+          type: string
+        confidenceScore:
+          type: integer
+          description: Confidence percentage (0-100)
+        urgency:
+          type: string
+          description: "CRITICAL, PRIORITY, or SCHEDULED"
+        urgencyTime:
+          type: string
+        actionLabel:
+          type: string
