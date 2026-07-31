@@ -1,23 +1,15 @@
 /**
- * DesignSystemPage — Full interactive Design System showcase
+ * DesignSystemPage — Design System showcase
  *
- * Sections: Foundations / Typography / Atoms / Enterprise Patterns / Motion / Hooks
- *
- * Features:
- *  - Light / dark theme toggle (data-ds-theme scoped — rest of app unaffected)
- *  - Compact / comfortable / spacious density toggle
- *  - Both toggles persist via useLocalStorageState (demonstrating the hook)
- *  - RuleOfThreeContainer wired to useAgenticOrchestrator (live MCP feed)
- *  - ChainOfThoughtDrawer driven by orchestrator's selected alert
- *  - HitlStagingCard driven by orchestrator's approval state machine
- *  - Toast notification, spring progress bar, skeleton loading motion demos
+ * Sections: Foundations / Typography / Atoms / Enterprise Patterns / Hooks
+ * Only shows components, tokens, and patterns that exist in the actual app.
  *
  * Cognitive Scaffold Design System v2.0
  */
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowLeft, Check, Copy, Sun, Moon, X } from "lucide-react";
+import { ArrowLeft, Check, Copy, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChainOfThoughtDrawer } from "@/components/patterns/ChainOfThoughtDrawer";
 import { HitlStagingCard } from "@/components/patterns/HitlStagingCard";
@@ -75,21 +67,7 @@ function TokenSwatch({ name, cssVar, value }: { name: string; cssVar: string; va
   );
 }
 
-/* ── Spring progress bar ─────────────────────────────────────────────────── */
-function SpringProgressBar({ target }: { target: number }) {
-  const spring = useSpring(0, { stiffness: 60, damping: 18 });
-  const width  = useTransform(spring, (v) => `${v}%`);
-
-  useEffect(() => { spring.set(target); }, [target, spring]);
-
-  return (
-    <div className="h-2 w-full bg-border/40 rounded-full overflow-hidden">
-      <motion.div className="h-full bg-primary rounded-full" style={{ width }} />
-    </div>
-  );
-}
-
-/* ── Skeleton card ──────────────────────────────────────────────────────── */
+/* ── Skeleton card (mirrors the loading state in the dashboard) ──────────── */
 function SkeletonCard() {
   return (
     <div className="bg-card border border-card-border rounded-sm p-5 relative overflow-hidden flex flex-col gap-4 animate-pulse">
@@ -113,40 +91,6 @@ function SkeletonCard() {
   );
 }
 
-/* ── Toast notification ─────────────────────────────────────────────────── */
-interface Toast { id: number; message: string; type: "approve" | "reject" | "info" }
-
-const toastColors: Record<Toast["type"], string> = {
-  approve: "border-l-hitl-approve bg-card",
-  reject:  "border-l-hitl-reject  bg-card",
-  info:    "border-l-primary      bg-card",
-};
-
-function ToastStack({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: number) => void }) {
-  return (
-    <div className="relative h-24 overflow-visible">
-      <AnimatePresence>
-        {toasts.map((t) => (
-          <motion.div
-            key={t.id}
-            layout
-            initial={{ opacity: 0, x: 40, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0,  scale: 1 }}
-            exit={{ opacity: 0, x: 40, scale: 0.92 }}
-            transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className={`absolute top-0 start-0 end-0 flex items-center justify-between gap-3 border border-border/30 border-l-4 rounded-sm px-4 py-3 ${toastColors[t.type]}`}
-          >
-            <span className="text-[13px] text-foreground/80">{t.message}</span>
-            <button onClick={() => onDismiss(t.id)} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 /* ── Density gap map ─────────────────────────────────────────────────────── */
 const densityGap: Record<Density, string> = {
   compact:     "gap-4",
@@ -156,32 +100,20 @@ const densityGap: Record<Density, string> = {
 
 /* ── Page ────────────────────────────────────────────────────────────────── */
 export default function DesignSystemPage() {
-  /* Persistent controls — useLocalStorageState demonstration */
+  /* Persistent controls — useLocalStorageState (same hook used throughout the app) */
   const [density, setDensity] = useLocalStorageState<Density>("ds:density", "comfortable");
   const [theme,   setTheme]   = useLocalStorageState<Theme>("ds:theme", "dark");
 
-  /* Live agentic state — useAgenticOrchestrator demonstration */
+  /* Live agentic state — same hook that drives the dashboard */
   const orchestrator = useAgenticOrchestrator(3);
 
-  /* Local demo state */
-  const [cotOpen,  setCotOpen]  = useState(false);
-  const [progressTarget, setProgressTarget] = useState(42);
-  const [showSkeleton, setShowSkeleton] = useState(false);
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [toastCounter, setToastCounter] = useState(0);
+  const [cotOpen, setCotOpen] = useState(false);
 
-  function addToast(message: string, type: Toast["type"] = "info") {
-    const id = toastCounter + 1;
-    setToastCounter(id);
-    setToasts((prev) => [{ id, message, type }, ...prev].slice(0, 2));
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
-  }
-
-  /* Translate labels for pattern components */
-  const urgencyLabels: Record<string, string> = { high: "HIGH", medium: "MEDIUM", low: "LOW" };
+  /* Labels passed to pattern components (same as App.tsx) */
+  const urgencyLabels:  Record<string, string> = { high: "HIGH", medium: "MEDIUM", low: "LOW" };
   const urgencyActions: Record<string, string> = { high: "Take Action", medium: "Review", low: "Open" };
 
-  /* CoT steps from selected alert or demo fallback */
+  /* CoT content from the selected alert, or static fallback */
   const cotSteps = orchestrator.selectedAlert?.chainOfThought ?? [
     "Analysed client portfolio volatility over trailing 90 days.",
     "Cross-referenced risk tolerance profile against current exposure.",
@@ -215,11 +147,11 @@ export default function DesignSystemPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Density toggle */}
+            {/* Density toggle — Compact / Comfortable / Spacious */}
             <div className="flex items-center gap-0.5 bg-card border border-border/40 rounded-sm p-0.5">
               {(["compact", "comfortable", "spacious"] as Density[]).map((d) => (
                 <button key={d} onClick={() => setDensity(d)}
-                  title={d}
+                  title={`${d[0].toUpperCase()}${d.slice(1)}`}
                   className={`font-mono text-[9px] tracking-widest uppercase px-2.5 py-1 rounded-[2px] transition-colors ${
                     density === d ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}>
@@ -252,8 +184,8 @@ export default function DesignSystemPage() {
             <div>
               <h1 className="text-[28px] font-semibold tracking-tight leading-none mb-2">Cognitive Scaffold</h1>
               <p className="text-[13px] text-muted-foreground max-w-xl">
-                Production-grade, token-driven design system for enterprise agentic interfaces.
-                OKLCH primitives → semantic aliases → enterprise patterns → motion.
+                Token-driven design system for the VIP Dashboard.
+                OKLCH primitives → semantic aliases → enterprise agentic patterns.
               </p>
             </div>
             <div className="flex-shrink-0 flex flex-col items-end gap-1">
@@ -268,10 +200,6 @@ export default function DesignSystemPage() {
               </span>
             ))}
           </div>
-          {/* Persistent-state proof */}
-          <p className="mt-4 text-[11px] font-mono text-muted-foreground/40">
-            Density &amp; theme toggles persist via <span className="text-primary">useLocalStorageState</span> — try refreshing.
-          </p>
         </motion.div>
       </div>
 
@@ -324,7 +252,7 @@ export default function DesignSystemPage() {
               <div className="bg-card border border-card-border rounded-sm p-4 space-y-2">
                 <p className="text-[12px] font-mono text-primary">Current mode: {theme}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  <code className="text-[10px] bg-background/50 px-1 py-0.5 rounded">data-ds-theme=&quot;{theme}&quot;</code> is scoped to this page container — the dashboard stays dark.
+                  <code className="text-[10px] bg-background/50 px-1 py-0.5 rounded">data-ds-theme=&quot;{theme}&quot;</code> is scoped to this page — the dashboard stays dark.
                 </p>
               </div>
               <div className="rounded-sm border border-border/40 px-4 py-3 text-[11px] font-mono text-muted-foreground/60 leading-relaxed">
@@ -384,24 +312,12 @@ export default function DesignSystemPage() {
         </Section>
 
         {/* ── 03 ATOMS ────────────────────────────────────────────────────── */}
-        <Section title="03 · Atoms" subtitle="Base interactive components with token-driven states">
-          <SubSection title="Buttons">
+        <Section title="03 · Atoms" subtitle="Base interactive components as they appear in the dashboard">
+          <SubSection title="Action Buttons">
             <div className="flex flex-wrap gap-3">
-              <Button className="bg-primary text-primary-foreground rounded-sm shadow-none">Primary Action</Button>
-              <Button variant="outline" className="rounded-sm shadow-none border-border/50">Secondary</Button>
-              <Button variant="outline" className="rounded-sm shadow-none border-border/50 text-muted-foreground" disabled>Disabled</Button>
-              <Button
-                className="rounded-sm shadow-none text-hitl-approve-fg border border-hitl-approve/60 bg-hitl-approve/10 hover:bg-hitl-approve/20"
-                onClick={() => addToast("Action approved and queued for execution.", "approve")}
-              >
-                Approve (fires toast)
-              </Button>
-              <Button
-                className="rounded-sm shadow-none text-hitl-reject-fg border border-hitl-reject/60 bg-hitl-reject/10 hover:bg-hitl-reject/20"
-                onClick={() => addToast("Action rejected. Returning to queue.", "reject")}
-              >
-                Reject (fires toast)
-              </Button>
+              <Button className="bg-primary text-primary-foreground rounded-sm shadow-none">Take Action</Button>
+              <Button variant="outline" className="rounded-sm shadow-none border-border/50">Review</Button>
+              <Button variant="outline" className="rounded-sm shadow-none border-border/50 text-muted-foreground" disabled>Dismissed</Button>
             </div>
           </SubSection>
 
@@ -417,25 +333,25 @@ export default function DesignSystemPage() {
             </div>
           </SubSection>
 
-          <SubSection title="Input / Textarea">
-            <div className="space-y-2 max-w-md">
-              <input placeholder="Search client portfolio…"
-                className="w-full bg-background border border-border/50 rounded-sm px-4 py-2.5 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-colors" />
-              <textarea placeholder="Draft communication…" rows={3}
-                className="w-full bg-background border border-border/50 rounded-sm px-4 py-2.5 text-[13px] text-foreground font-mono placeholder:text-muted-foreground resize-none focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-colors" />
+          <SubSection title="Approve / Reject Actions">
+            <div className="flex flex-wrap gap-3">
+              <Button className="rounded-sm shadow-none text-hitl-approve-fg border border-hitl-approve/60 bg-hitl-approve/10 hover:bg-hitl-approve/20">
+                Approve &amp; Execute
+              </Button>
+              <Button className="rounded-sm shadow-none text-hitl-reject-fg border border-hitl-reject/60 bg-hitl-reject/10 hover:bg-hitl-reject/20">
+                Reject
+              </Button>
             </div>
           </SubSection>
         </Section>
 
         {/* ── 04 ENTERPRISE AGENTIC PATTERNS ──────────────────────────────── */}
         <Section title="04 · Enterprise Agentic Patterns"
-          subtitle="Live patterns wired to useAgenticOrchestrator — same state machine used in the dashboard">
+          subtitle="Live pattern components wired to useAgenticOrchestrator — the same hook driving the dashboard">
 
-          {/* RuleOfThreeContainer — wired to live MCP feed via orchestrator */}
           <SubSection title="Rule-of-Three Container (live MCP feed)">
             <p className="text-[12px] text-muted-foreground/60 -mt-1 mb-3">
-              Driven by <code className="font-mono text-[11px] text-primary">useAgenticOrchestrator</code>.
-              Click a card to select it — the CoT drawer and HITL card below respond to the same selection.
+              Select a card — the CoT drawer and HITL card below respond to the same orchestrator selection.
             </p>
             {orchestrator.isLoading ? (
               <div className="space-y-3"><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
@@ -464,12 +380,11 @@ export default function DesignSystemPage() {
             )}
           </SubSection>
 
-          {/* ChainOfThoughtDrawer — driven by selected alert */}
-          <SubSection title="Chain-of-Thought Drawer (driven by selected alert)">
+          <SubSection title="Chain-of-Thought Drawer">
             <p className="text-[12px] text-muted-foreground/60 -mt-1 mb-2">
               {orchestrator.selectedAlert
                 ? `Showing CoT for: ${orchestrator.selectedAlert.clientName}`
-                : "Select a card above to load its reasoning — or view the demo fallback below."}
+                : "Select a card above to load its reasoning, or view the static fallback below."}
             </p>
             <ChainOfThoughtDrawer
               steps={cotSteps}
@@ -480,139 +395,39 @@ export default function DesignSystemPage() {
             />
           </SubSection>
 
-          {/* HitlStagingCard — driven by orchestrator's approval state machine */}
-          <SubSection title="HITL Staging Card (staged approval state machine)">
+          <SubSection title="HITL Staging Card">
             <p className="text-[12px] text-muted-foreground/60 -mt-1 mb-3">
               {orchestrator.selectedAlert
                 ? `Ready to approve: ${orchestrator.selectedAlert.clientName}`
-                : "Select a card in the Rule-of-Three above, then approve here."}
+                : "Select a card above, then approve or reject here."}
               &nbsp;State: <code className="font-mono text-[11px] text-primary">{orchestrator.approvalState}</code>
             </p>
             <div className="max-w-sm">
               <HitlStagingCard
                 approvalState={orchestrator.approvalState}
                 confidenceScore={orchestrator.selectedAlert?.confidenceScore ?? 78}
-                onApprove={() => {
-                  orchestrator.handleApprove();
-                  addToast("Executing approved action via MCP…", "approve");
-                }}
-                onReject={() => {
-                  orchestrator.handleReject();
-                  addToast("Action rejected. Returned to queue.", "reject");
-                }}
+                onApprove={orchestrator.handleApprove}
+                onReject={orchestrator.handleReject}
               />
             </div>
           </SubSection>
         </Section>
 
-        {/* ── 05 MOTION ────────────────────────────────────────────────────── */}
-        <Section title="05 · Motion" subtitle="framer-motion — duration tokens, spring physics, reduced-motion safe">
-
-          {/* Toast stack demo */}
-          <SubSection title="Toast Notifications (spring entrance/exit)">
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" className="rounded-sm shadow-none border-border/50 text-[13px]"
-                  onClick={() => addToast("MCP feed connection established.", "info")}>
-                  Info toast
-                </Button>
-                <Button variant="outline" className="rounded-sm shadow-none border-border/50 text-[13px]"
-                  onClick={() => addToast("Portfolio rebalancing approved and queued.", "approve")}>
-                  Approve toast
-                </Button>
-                <Button variant="outline" className="rounded-sm shadow-none border-border/50 text-[13px]"
-                  onClick={() => addToast("Action rejected — returned to queue.", "reject")}>
-                  Reject toast
-                </Button>
-              </div>
-              <ToastStack toasts={toasts} onDismiss={(id) => setToasts((p) => p.filter((t) => t.id !== id))} />
-            </div>
-          </SubSection>
-
-          {/* Spring progress bar */}
-          <SubSection title="Spring Progress Bar (physics-based interpolation)">
-            <div className="space-y-4 max-w-md">
-              <SpringProgressBar target={progressTarget} />
-              <div className="flex flex-wrap gap-2">
-                {[0, 25, 50, 78, 100].map((v) => (
-                  <Button key={v} variant="outline"
-                    className={`rounded-sm shadow-none border-border/50 text-[12px] font-mono px-3 py-1.5 ${progressTarget === v ? "border-primary text-primary" : ""}`}
-                    onClick={() => setProgressTarget(v)}>
-                    {v}%
-                  </Button>
-                ))}
-              </div>
-              <p className="font-mono text-[10px] text-muted-foreground/40">
-                stiffness: 60 · damping: 18 · easing: spring
-              </p>
-            </div>
-          </SubSection>
-
-          {/* Skeleton loading state */}
-          <SubSection title="Skeleton Loading State (pulse animation)">
-            <div className="space-y-3">
-              <Button variant="outline" className="rounded-sm shadow-none border-border/50 text-[13px]"
-                onClick={() => { setShowSkeleton(true); setTimeout(() => setShowSkeleton(false), 2200); }}>
-                Simulate feed loading (2.2 s)
-              </Button>
-              <AnimatePresence mode="wait">
-                {showSkeleton ? (
-                  <motion.div key="skel" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="space-y-3">
-                    <SkeletonCard /><SkeletonCard />
-                  </motion.div>
-                ) : (
-                  <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="bg-card border border-card-border rounded-sm p-4 text-[13px] text-muted-foreground">
-                    Content loaded — skeleton replaced.
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </SubSection>
-
-          {/* Stagger fade-up */}
-          <SubSection title="Stagger Entrance (fade-up with children delay)">
-            <motion.div
-              key={density}
-              initial="hidden"
-              animate="show"
-              variants={{ show: { transition: { staggerChildren: 0.07 } } }}
-              className="grid grid-cols-3 gap-3"
-            >
-              {["instant · 100ms", "fast · 200ms", "default · 300ms", "slow · 500ms", "approval · 1100ms", "spring easing"].map((label) => (
-                <motion.div key={label}
-                  variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.25 } } }}
-                  className="bg-card border border-card-border rounded-sm px-3 py-2.5 text-center">
-                  <span className="font-mono text-[10px] text-muted-foreground/60">{label}</span>
-                </motion.div>
-              ))}
-            </motion.div>
-          </SubSection>
-
-          <SubSection title="Reduced-motion safe">
-            <div className="bg-card border border-border/40 rounded-sm px-4 py-3 font-mono text-[12px] text-muted-foreground/60">
-              @media (prefers-reduced-motion: reduce) — all durations collapse to 0.01ms
-            </div>
-          </SubSection>
-        </Section>
-
-        {/* ── 06 MIDDLE-LAYER HOOKS ────────────────────────────────────────── */}
-        <Section title="06 · Middle-Layer Hooks"
-          subtitle="Reusable state primitives — both are live on this page right now">
+        {/* ── 05 MIDDLE-LAYER HOOKS ────────────────────────────────────────── */}
+        <Section title="05 · Middle-Layer Hooks" subtitle="State primitives shared across the app">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               {
                 name: "useLocalStorageState",
                 sig: "useLocalStorageState<T>(key, initial)",
-                desc: "localStorage-backed useState with cross-tab sync and private-browsing fallback. Drives the density & theme toggles above — try refreshing.",
+                desc: "localStorage-backed useState with cross-tab sync and private-browsing fallback. Drives the density & theme toggles on this page — try refreshing.",
                 live: `ds:density = "${density}" · ds:theme = "${theme}"`,
                 tags: ["storage", "cross-tab", "resilient"],
               },
               {
                 name: "useAgenticOrchestrator",
                 sig: "useAgenticOrchestrator(visibleCount?)",
-                desc: "Central agentic state: MCP feed, dismissal queue, selection, CoT visibility, staged HITL approval. Drives the Rule-of-Three, CoT drawer, and HITL card above.",
+                desc: "Central agentic state: MCP feed, dismissal queue, selection, CoT visibility, and staged HITL approval. Drives all three pattern components above.",
                 live: `${orchestrator.activeAlerts.length} active · selected: ${orchestrator.selectedAlert?.clientName ?? "none"} · approval: ${orchestrator.approvalState}`,
                 tags: ["MCP", "HITL", "CoT", "RoT", "dismissal"],
               },
