@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { Shield, Briefcase, Calendar, BarChart3, Settings, X, Check, Loader2 } from "lucide-react";
+import { Link } from "wouter";
+import { Shield, Briefcase, Calendar, BarChart3, Settings, X, Check, Loader2, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetMcpFeed } from "@workspace/api-client-react";
 import type { McpAlert } from "@workspace/api-client-react";
@@ -566,7 +567,16 @@ export default function App() {
             ))}
           </nav>
         </div>
-        <div className="p-4 border-t border-sidebar-border/50">
+        <div className="p-4 border-t border-sidebar-border/50 space-y-1">
+          {/* Design System shortcut */}
+          <Link
+            href="/design-system"
+            className="flex items-center gap-3 px-3 py-2 rounded-sm text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors w-full"
+          >
+            <Layers className="w-4 h-4 flex-shrink-0" />
+            <span>Design System</span>
+          </Link>
+          {/* User profile row */}
           <div className="flex items-center gap-3 px-2 py-2">
             <div className="w-8 h-8 rounded-full bg-border flex items-center justify-center overflow-hidden flex-shrink-0">
               <span className="text-xs font-semibold text-muted-foreground">JD</span>
