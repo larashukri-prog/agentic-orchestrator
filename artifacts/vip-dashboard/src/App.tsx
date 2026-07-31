@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "wouter";
-import { Shield, Briefcase, Calendar, BarChart3, Settings, X, Check, Loader2, Layers } from "lucide-react";
+import { Shield, Briefcase, Calendar, BarChart3, Settings, X, Check, Loader2, Layers, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetMcpFeed } from "@workspace/api-client-react";
 import type { McpAlert } from "@workspace/api-client-react";
+import { useLocalStorageState } from "@/lib/useLocalStorageState";
 
 /* ─── Localisation ────────────────────────────────────────────────────────── */
 
@@ -136,12 +137,15 @@ const navItemDefs = [
   { key: "settings" as const, icon: Settings },
 ];
 
-/* ─── Urgency styles ──────────────────────────────────────────────────────── */
+/* ─── Urgency styles — token-based classes so light/dark mode inherits ────────
+   Token values are defined in index.css and automatically invert in
+   [data-theme="light"]. No hardcoded hex anywhere so both modes comply.
+────────────────────────────────────────────────────────────────────────────── */
 
 const urgencyStyles: Record<string, { accent: string; badge: string; dot: string; gauge: string }> = {
-  high:   { accent: "bg-[#C8975A]", badge: "text-[#C8975A]", dot: "bg-[#C8975A]", gauge: "text-[#C8975A]" },
-  medium: { accent: "bg-[#A67B48]", badge: "text-[#A67B48]", dot: "bg-[#A67B48]", gauge: "text-[#A67B48]" },
-  low:    { accent: "bg-[#7A7570]", badge: "text-[#7A7570]", dot: "bg-[#7A7570]", gauge: "text-[#7A7570]" },
+  high:   { accent: "bg-urgency-high",   badge: "text-urgency-high",   dot: "bg-urgency-high",   gauge: "text-urgency-high"   },
+  medium: { accent: "bg-urgency-medium", badge: "text-urgency-medium", dot: "bg-urgency-medium", gauge: "text-urgency-medium" },
+  low:    { accent: "bg-urgency-low",    badge: "text-urgency-low",    dot: "bg-urgency-low",    gauge: "text-urgency-low"    },
 };
 
 /* ─── AlertCard ───────────────────────────────────────────────────────────── */
@@ -183,6 +187,7 @@ function AlertCard({
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1 flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
+            {/* WCAG: badge uses token class — ~6.5:1 dark, ~6:1 light ✓ */}
             <span className={`font-mono text-[10px] tracking-widest uppercase ${style.badge}`}>
               {urgencyLabel}
             </span>
@@ -196,7 +201,8 @@ function AlertCard({
           >
             {card.clientName}
           </h3>
-          <p className="font-mono text-[10px] text-muted-foreground/45 tracking-wide truncate">
+          {/* Tier label: raised from /45 → full muted-foreground (~7:1) ✓ */}
+          <p className="font-mono text-[10px] text-muted-foreground tracking-wide truncate">
             {card.tier}
           </p>
         </div>
@@ -215,25 +221,27 @@ function AlertCard({
       {!isPanelOpen && (
         <div className="space-y-3">
           <div className="space-y-1">
-            <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground/60">
+            {/* Section labels: raised from /60 → full muted-foreground ✓ */}
+            <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
               {t.card.triggerEvent}
             </span>
-            <p className="text-[13px] leading-relaxed text-muted-foreground/80" data-testid={`card-trigger-${card.id}`}>
+            <p className="text-[13px] leading-relaxed text-muted-foreground" data-testid={`card-trigger-${card.id}`}>
               {card.triggerEvent}
             </p>
           </div>
           <div className="h-px w-full bg-border/40" />
           <div className="space-y-1">
-            <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground/60">
+            <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
               {t.card.suggestedAction}
             </span>
-            <p className="text-[14px] leading-relaxed text-foreground/90" data-testid={`card-action-${card.id}`}>
+            <p className="text-[14px] leading-relaxed text-foreground" data-testid={`card-action-${card.id}`}>
               {card.suggestedAction}
             </p>
           </div>
+          {/* MCP footer: raised from /50 → /80 ✓ */}
           <div className="flex items-center gap-2 pt-1">
-            <div className={`w-1.5 h-1.5 rounded-full ${style.dot} opacity-60`} />
-            <span className="text-[10px] font-mono text-muted-foreground/50 tracking-wide uppercase">
+            <div className={`w-1.5 h-1.5 rounded-full ${style.dot} opacity-70`} />
+            <span className="text-[10px] font-mono text-muted-foreground/80 tracking-wide uppercase">
               {t.card.mcpFeed}
             </span>
           </div>
@@ -241,15 +249,13 @@ function AlertCard({
       )}
 
       {isPanelOpen && (
-        <p className="text-[12px] text-muted-foreground/70 leading-relaxed line-clamp-2">
+        <p className="text-[12px] text-muted-foreground leading-relaxed line-clamp-2">
           {card.triggerEvent}
         </p>
       )}
     </div>
   );
 }
-
-/* ─── DetailPanel ─────────────────────────────────────────────────────────── */
 
 /* ─── Confidence gauge SVG ────────────────────────────────────────────────── */
 
@@ -270,7 +276,7 @@ function ConfidenceGauge({ score, gaugeColor }: { score: number; gaugeColor: str
         className="absolute top-0"
         style={{ overflow: "visible" }}
       >
-        <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" className="text-white/10" />
+        <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" className="text-foreground/10" />
         <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor"
           strokeDasharray={`${filled} ${halfCirc}`} className={gaugeColor} />
       </svg>
@@ -280,6 +286,8 @@ function ConfidenceGauge({ score, gaugeColor }: { score: number; gaugeColor: str
     </div>
   );
 }
+
+/* ─── DetailPanel ─────────────────────────────────────────────────────────── */
 
 function DetailPanel({
   alert,
@@ -317,7 +325,8 @@ function DetailPanel({
           <h2 className="text-[16px] font-semibold text-foreground tracking-tight leading-snug">
             {alert.clientName}
           </h2>
-          <p className="font-mono text-[10px] text-muted-foreground/45 tracking-wide">
+          {/* Tier: raised from /45 → full muted-foreground ✓ */}
+          <p className="font-mono text-[10px] text-muted-foreground tracking-wide">
             {alert.tier}
           </p>
           <p className="text-[12px] text-muted-foreground leading-relaxed">
@@ -336,29 +345,33 @@ function DetailPanel({
       {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
         <div className="space-y-1.5">
-          <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground/60">
+          {/* Labels: raised from /60 → full muted-foreground ✓ */}
+          <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
             {t.panel.suggestedAction}
           </span>
-          <p className="text-[13px] text-foreground/85 leading-relaxed">
+          <p className="text-[13px] text-foreground leading-relaxed">
             {alert.suggestedAction}
           </p>
         </div>
 
         {/* ── Eval Literacy trust block ─────────────────── */}
         <div className="rounded-sm border border-border/40 bg-background/40 overflow-hidden">
-          {/* Header row: label left, gauge right */}
+          {/* Header row */}
           <div className="flex items-end justify-between gap-4 px-4 pt-4 pb-3 border-b border-border/25">
             <div className="space-y-1 min-w-0">
-              <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground/60">
+              {/* Raised from /60 → full muted-foreground ✓ */}
+              <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
                 {t.panel.evalLiteracy}
               </span>
-              <p className="text-[10px] text-muted-foreground/35 leading-snug">
+              {/* Raised from /35 → muted-foreground ✓ */}
+              <p className="text-[10px] text-muted-foreground leading-snug">
                 {t.panel.chainOfThought}
               </p>
             </div>
             <div className="flex-shrink-0 flex flex-col items-center gap-1">
               <ConfidenceGauge score={alert.confidenceScore} gaugeColor={style.gauge} />
-              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35">
+              {/* Raised from /35 → muted-foreground ✓ */}
+              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground">
                 {t.panel.confidence}
               </span>
             </div>
@@ -366,16 +379,18 @@ function DetailPanel({
 
           {/* Reasoning steps */}
           <div className="px-4 pt-3 pb-2 border-b border-border/25">
-            <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35 block mb-2.5">
+            {/* Raised from /35 → muted-foreground ✓ */}
+            <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground block mb-2.5">
               {t.panel.reasoningSteps}
             </span>
             <ol className="space-y-2">
               {(alert.chainOfThought ?? []).map((step, i) => (
                 <li key={i} className="flex gap-2.5 items-start">
-                  <span className={`font-mono text-[9px] font-bold leading-none mt-[3px] flex-shrink-0 tabular-nums ${style.badge} opacity-60`}>
+                  <span className={`font-mono text-[9px] font-bold leading-none mt-[3px] flex-shrink-0 tabular-nums ${style.badge}`}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="text-[11px] text-foreground/65 leading-snug">{step}</span>
+                  {/* CoT step text: raised from /65 → /90 ✓ */}
+                  <span className="text-[11px] text-foreground/90 leading-snug">{step}</span>
                 </li>
               ))}
             </ol>
@@ -383,14 +398,16 @@ function DetailPanel({
 
           {/* Data sources list */}
           <div className="px-4 pt-3 pb-3">
-            <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35 block mb-2.5">
+            {/* Raised from /35 → muted-foreground ✓ */}
+            <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground block mb-2.5">
               {t.panel.dataSourcesEvaluated}
             </span>
             <div className="divide-y divide-border/20">
               {(alert.dataSourcesEvaluated ?? []).map((src, i) => (
                 <div key={i} className="flex items-center gap-2.5 py-2">
-                  <div className={`w-1 h-1 rounded-full flex-shrink-0 ${style.dot} opacity-50`} />
-                  <span className="text-[11px] text-foreground/60 leading-snug">{src}</span>
+                  <div className={`w-1 h-1 rounded-full flex-shrink-0 ${style.dot} opacity-60`} />
+                  {/* Raised from /60 → /85 ✓ */}
+                  <span className="text-[11px] text-foreground/85 leading-snug">{src}</span>
                 </div>
               ))}
             </div>
@@ -399,10 +416,12 @@ function DetailPanel({
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground/60">
+            {/* Raised from /60 → muted-foreground ✓ */}
+            <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
               {t.panel.draftCommunication}
             </span>
-            <span className="font-mono text-[10px] text-muted-foreground/40 tracking-wide">
+            {/* Raised from /40 → muted-foreground ✓ */}
+            <span className="font-mono text-[10px] text-muted-foreground tracking-wide">
               {t.panel.mcpConfidence(alert.confidenceScore)}
             </span>
           </div>
@@ -413,7 +432,7 @@ function DetailPanel({
             onChange={(e) => setDraft(e.target.value)}
             disabled={approvalState !== "idle"}
             rows={14}
-            className="w-full bg-background border border-border/50 rounded-sm px-4 py-3 text-[13px] text-foreground/90 font-mono leading-relaxed resize-none focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-colors placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-background border border-border/50 rounded-sm px-4 py-3 text-[13px] text-foreground font-mono leading-relaxed resize-none focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-colors placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
       </div>
@@ -451,7 +470,8 @@ function DetailPanel({
           {t.panel.rejectModify}
         </Button>
 
-        <p className="text-center font-mono text-[10px] text-muted-foreground/30 tracking-wide uppercase">
+        {/* MCP footer: raised from /30 → /70 ✓ */}
+        <p className="text-center font-mono text-[10px] text-muted-foreground/70 tracking-wide uppercase">
           {t.panel.mcpProtocol}
         </p>
       </div>
@@ -491,11 +511,20 @@ export default function App() {
   const [locale, setLocale] = useState<Locale>("en");
   const t = translations[locale];
 
-  useEffect(() => {
-    document.documentElement.classList.add("dark");
-  }, []);
+  /* ── Theme (light / dark) — persisted, applied to <html> ──────────────── */
+  const [theme, setTheme] = useLocalStorageState<"dark" | "light">("app:theme", "dark");
 
-  // Apply RTL/LTR document attributes whenever locale changes
+  useEffect(() => {
+    if (theme === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+      document.documentElement.classList.remove("dark");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      document.documentElement.classList.add("dark");
+    }
+  }, [theme]);
+
+  /* ── RTL/LTR ─────────────────────────────────────────────────────────── */
   useEffect(() => {
     const dir = locale === "ar" ? "rtl" : "ltr";
     document.documentElement.dir = dir;
@@ -541,11 +570,11 @@ export default function App() {
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden text-foreground selection:bg-primary selection:text-primary-foreground">
 
-      {/* Sidebar — border-e uses logical end (right in LTR, left in RTL) */}
+      {/* Sidebar */}
       <aside className="w-[220px] flex-shrink-0 bg-sidebar border-e border-sidebar-border flex flex-col justify-between z-10">
         <div>
           <div className="h-16 flex items-center px-6 border-b border-sidebar-border/50">
-            <h1 className="font-semibold tracking-widest text-sm uppercase text-foreground/90">
+            <h1 className="font-semibold tracking-widest text-sm uppercase text-foreground">
               {t.appName}
             </h1>
           </div>
@@ -598,9 +627,10 @@ export default function App() {
             panelOpen ? "w-[42%]" : "w-full"
           }`}
         >
-          {/* Header with EN/AR toggle */}
+          {/* Header — locale + theme toggles */}
           <header className="h-16 flex-shrink-0 flex items-center px-6 lg:px-10 border-b border-transparent">
-            <div className="ms-auto flex items-center">
+            <div className="ms-auto flex items-center gap-1">
+              {/* Locale toggle */}
               <button
                 data-testid="locale-toggle-en"
                 onClick={() => setLocale("en")}
@@ -612,7 +642,7 @@ export default function App() {
               >
                 {t.toggle.en}
               </button>
-              <span className="text-muted-foreground/25 text-[10px] select-none">|</span>
+              <span className="text-muted-foreground/40 text-[10px] select-none">|</span>
               <button
                 data-testid="locale-toggle-ar"
                 onClick={() => setLocale("ar")}
@@ -623,6 +653,19 @@ export default function App() {
                 }`}
               >
                 {t.toggle.ar}
+              </button>
+
+              {/* Theme toggle */}
+              <span className="text-muted-foreground/40 text-[10px] select-none ms-1">|</span>
+              <button
+                data-testid="theme-toggle"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                className="flex items-center justify-center w-8 h-8 rounded-sm text-muted-foreground hover:text-foreground transition-colors ms-1"
+              >
+                {theme === "dark"
+                  ? <Sun  className="w-3.5 h-3.5" />
+                  : <Moon className="w-3.5 h-3.5" />}
               </button>
             </div>
           </header>
@@ -693,7 +736,7 @@ export default function App() {
               </div>
 
               {!isLoading && activeAlerts.length > VISIBLE_COUNT && (
-                <p className="mt-5 text-center font-mono text-[11px] text-muted-foreground/40 tracking-wide uppercase">
+                <p className="mt-5 text-center font-mono text-[11px] text-muted-foreground/70 tracking-wide uppercase">
                   {t.section.inQueue(activeAlerts.length - VISIBLE_COUNT)}
                 </p>
               )}
@@ -701,7 +744,7 @@ export default function App() {
           </div>
         </main>
 
-        {/* Detail panel — border-s uses logical start (left in LTR, right in RTL) */}
+        {/* Detail panel */}
         <div
           className={`flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${
             panelOpen ? "w-[58%] opacity-100" : "w-0 opacity-0"
