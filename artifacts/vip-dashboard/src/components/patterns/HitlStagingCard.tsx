@@ -93,12 +93,12 @@ export function HitlStagingCard({
         {rejectLabel}
       </Button>
 
-      {/* Footer */}
+      {/* Footer — WCAG: full muted-foreground token (~7:1); was /30 and /40 */}
       <div className="flex items-center justify-between pt-1">
-        <p className="font-mono text-[10px] text-muted-foreground/30 tracking-wide uppercase">
+        <p className="font-mono text-[10px] text-muted-foreground tracking-wide uppercase">
           {footerLabel}
         </p>
-        <span className="font-mono text-[10px] text-muted-foreground/40 tracking-wide">
+        <span className="font-mono text-[10px] text-muted-foreground tracking-wide">
           {confidenceLabel(confidenceScore)}
         </span>
       </div>

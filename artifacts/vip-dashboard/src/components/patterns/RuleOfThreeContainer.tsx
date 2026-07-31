@@ -7,6 +7,9 @@
  * All state is owned by useAgenticOrchestrator; this component is pure UI.
  *
  * Cognitive Scaffold Design System — Enterprise Agentic Patterns
+ *
+ * WCAG 2.1 AA: all text uses full semantic tokens — opacity modifiers (/30–/80)
+ * removed because they lowered contrast below 4.5:1 at the point of use.
  */
 import { motion } from "framer-motion";
 import type { McpAlert } from "@workspace/api-client-react";
@@ -105,8 +108,8 @@ export function RuleOfThreeContainer({
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1 flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  {/* Priority rank pill */}
-                  <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/30 border border-border/30 rounded-sm px-1.5 py-0.5">
+                  {/* P-rank pill: full muted-foreground + border/50 — was /30 text & /30 border */}
+                  <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground border border-border/50 rounded-sm px-1.5 py-0.5">
                     P{idx + 1}
                   </span>
                   <span className={`font-mono text-[10px] tracking-widest uppercase ${badge}`}>
@@ -119,7 +122,8 @@ export function RuleOfThreeContainer({
                 <h3 className={`font-semibold text-foreground tracking-tight leading-snug ${isPanelOpen ? "text-[15px]" : "text-[18px]"}`}>
                   {alert.clientName}
                 </h3>
-                <p className="font-mono text-[10px] text-muted-foreground/45 tracking-wide truncate">
+                {/* Tier: full muted-foreground — was /45 */}
+                <p className="font-mono text-[10px] text-muted-foreground tracking-wide truncate">
                   {alert.tier}
                 </p>
               </div>
@@ -138,25 +142,31 @@ export function RuleOfThreeContainer({
             {!isPanelOpen && (
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground/60">
+                  {/* Section labels: full muted-foreground — was /60 */}
+                  <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
                     {triggerEventLabel}
                   </span>
-                  <p className="text-[13px] leading-relaxed text-muted-foreground/80">
+                  {/* Body text: full muted-foreground — was /80 */}
+                  <p className="text-[13px] leading-relaxed text-muted-foreground">
                     {alert.triggerEvent}
                   </p>
                 </div>
                 <div className="h-px w-full bg-border/40" />
                 <div className="space-y-1">
-                  <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground/60">
+                  {/* Section labels: full muted-foreground — was /60 */}
+                  <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
                     {suggestedActionLabel}
                   </span>
-                  <p className="text-[14px] leading-relaxed text-foreground/90">
+                  {/* Action text: full foreground — was /90 */}
+                  <p className="text-[14px] leading-relaxed text-foreground">
                     {alert.suggestedAction}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 pt-1">
+                  {/* Decorative dot: opacity-60 is acceptable for non-text elements */}
                   <div className={`w-1.5 h-1.5 rounded-full ${dot} opacity-60`} />
-                  <span className="text-[10px] font-mono text-muted-foreground/50 tracking-wide uppercase">
+                  {/* MCP label: full muted-foreground — was /50 */}
+                  <span className="text-[10px] font-mono text-muted-foreground tracking-wide uppercase">
                     {mcpFeedLabel}
                   </span>
                 </div>
@@ -164,7 +174,8 @@ export function RuleOfThreeContainer({
             )}
 
             {isPanelOpen && (
-              <p className="text-[12px] text-muted-foreground/70 leading-relaxed line-clamp-2">
+              /* Trigger preview: full muted-foreground — was /70 */
+              <p className="text-[12px] text-muted-foreground leading-relaxed line-clamp-2">
                 {alert.triggerEvent}
               </p>
             )}

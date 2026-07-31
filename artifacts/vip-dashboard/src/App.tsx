@@ -260,33 +260,54 @@ function AlertCard({
 /* ─── Confidence gauge SVG ────────────────────────────────────────────────── */
 
 function ConfidenceGauge({ score, gaugeColor }: { score: number; gaugeColor: string }) {
-  // sweep-flag=1 → clockwise → arc curves UPWARD (arch shape, apex at y≈4).
-  // sweep-flag=0 was counterclockwise → downward U-cup that bled below the SVG
-  // element via overflow:visible and overlapped the label. Fixed by flipping the flag
-  // and removing overflow:visible so the SVG clips to its own bounds.
-  const r = 22;
-  const cx = 28;
-  const cy = 28; // arc endpoints sit at y=28; viewBox starts at y=2 → rendered y=26
-  const halfCirc = Math.PI * r;
-  const filled = (score / 100) * halfCirc;
-  const path = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+  // Full circular progress ring — score centered inside.
+  // stroke="currentColor" inherits from gaugeColor (text-urgency-*) Tailwind class.
+  const size = 58;
+  const strokeW = 4;
+  const r = (size - strokeW * 2) / 2;        // 25
+  const circumference = 2 * Math.PI * r;      // ~157
+  const filled = (score / 100) * circumference;
 
   return (
-    // height=48: arc endpoints at rendered y≈26, score text at bottom ≈ y=34–48 → 8px gap
-    <div className="relative flex flex-col items-center justify-end" style={{ width: 56, height: 48 }}>
+    <div className="relative" style={{ width: size, height: size }}>
+      {/* Rotate −90° so the fill starts at 12 o'clock */}
       <svg
-        width="56"
-        height="26"
-        viewBox="0 2 56 26"
-        className="absolute top-0"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        style={{ transform: "rotate(-90deg)" }}
       >
-        <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" className="text-foreground/10" />
-        <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor"
-          strokeDasharray={`${filled} ${halfCirc}`} className={gaugeColor} />
+        {/* Track ring */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          strokeWidth={strokeW}
+          stroke="currentColor"
+          className="text-foreground/10"
+          strokeLinecap="round"
+        />
+        {/* Filled arc */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          strokeWidth={strokeW}
+          stroke="currentColor"
+          className={gaugeColor}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference - filled}
+        />
       </svg>
-      <span className="relative font-mono text-[14px] font-bold text-foreground leading-none">
-        {score}<span className="text-[9px] font-normal opacity-50 ms-0.5">%</span>
-      </span>
+      {/* Score centered over the ring */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="font-mono text-[13px] font-bold text-foreground leading-none tabular-nums">
+          {score}<span className="text-[9px] font-normal opacity-50 ms-0.5">%</span>
+        </span>
+      </div>
     </div>
   );
 }

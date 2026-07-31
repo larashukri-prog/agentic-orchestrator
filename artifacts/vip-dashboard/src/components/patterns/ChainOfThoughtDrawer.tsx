@@ -21,7 +21,7 @@ export interface ChainOfThoughtDrawerProps {
   dataSources:     string[];
   isOpen:          boolean;
   onToggle:        () => void;
-  /** Tailwind colour class for the accent, e.g. "text-[#C8975A]" */
+  /** Tailwind colour class for the accent, e.g. "text-urgency-high" */
   accentClass?:    string;
   label?:          string;
   confidenceLabel?: string;
@@ -29,25 +29,42 @@ export interface ChainOfThoughtDrawerProps {
   sourcesLabel?:    string;
 }
 
+/** Full circular progress ring — matches App.tsx ConfidenceGauge. */
 function ConfidenceGauge({ score, accentClass }: { score: number; accentClass: string }) {
-  const r         = 22;
-  const cx        = 28;
-  const cy        = 28;
-  const halfCirc  = Math.PI * r;
-  const filled    = (score / 100) * halfCirc;
-  const path      = `M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`;
+  const size = 48;
+  const strokeW = 3.5;
+  const r = (size - strokeW * 2) / 2;        // 20.5
+  const circumference = 2 * Math.PI * r;
+  const filled = (score / 100) * circumference;
 
   return (
-    <div className="relative flex flex-col items-center justify-end" style={{ width: 56, height: 38 }}>
-      <svg width="56" height="26" viewBox="0 2 56 26" className="absolute top-0" style={{ overflow: "visible" }}>
-        <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round"
-              stroke="currentColor" className="text-white/10" />
-        <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round"
-              stroke="currentColor" strokeDasharray={`${filled} ${halfCirc}`} className={accentClass} />
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        style={{ transform: "rotate(-90deg)" }}
+      >
+        {/* Track */}
+        <circle
+          cx={size / 2} cy={size / 2} r={r}
+          fill="none" strokeWidth={strokeW} stroke="currentColor"
+          className="text-foreground/10" strokeLinecap="round"
+        />
+        {/* Progress */}
+        <circle
+          cx={size / 2} cy={size / 2} r={r}
+          fill="none" strokeWidth={strokeW} stroke="currentColor"
+          className={accentClass} strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference - filled}
+        />
       </svg>
-      <span className="relative font-mono text-[14px] font-bold text-foreground leading-none">
-        {score}<span className="text-[9px] font-normal opacity-50 ms-0.5">%</span>
-      </span>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="font-mono text-[11px] font-bold text-foreground leading-none tabular-nums">
+          {score}<span className="text-[8px] font-normal opacity-50 ms-0.5">%</span>
+        </span>
+      </div>
     </div>
   );
 }
@@ -73,7 +90,8 @@ export function ChainOfThoughtDrawer({
         aria-expanded={isOpen}
       >
         <div className="space-y-0.5 min-w-0 flex-1">
-          <p className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/40">
+          {/* WCAG: full muted-foreground token (~7:1) — was /40 (~2.8:1, failed) */}
+          <p className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground">
             {label}
           </p>
         </div>
@@ -82,7 +100,7 @@ export function ChainOfThoughtDrawer({
           <motion.span
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.2 }}
-            className="text-muted-foreground/40"
+            className="text-muted-foreground"
           >
             <ChevronDown className="w-3.5 h-3.5" />
           </motion.span>
@@ -101,16 +119,19 @@ export function ChainOfThoughtDrawer({
           >
             {/* Reasoning steps */}
             <div className="px-4 pt-3 pb-2 border-b border-cot-border/30">
-              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35 block mb-2.5">
+              {/* WCAG: full token — was /35 (~2.4:1, failed) */}
+              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground block mb-2.5">
                 {stepsLabel}
               </span>
               <ol className="space-y-2">
                 {steps.map((step, i) => (
                   <li key={i} className="flex gap-2.5 items-start">
-                    <span className={`font-mono text-[9px] font-bold leading-none mt-[3px] flex-shrink-0 tabular-nums ${accentClass} opacity-60`}>
+                    {/* Step number: full accent, no opacity modifier */}
+                    <span className={`font-mono text-[9px] font-bold leading-none mt-[3px] flex-shrink-0 tabular-nums ${accentClass}`}>
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="text-[11px] text-foreground/65 leading-snug">{step}</span>
+                    {/* Step text: full foreground — was /65 */}
+                    <span className="text-[11px] text-foreground leading-snug">{step}</span>
                   </li>
                 ))}
               </ol>
@@ -118,21 +139,24 @@ export function ChainOfThoughtDrawer({
 
             {/* Confidence label row */}
             <div className="px-4 pt-2 pb-1">
-              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35">
+              {/* WCAG: full token — was /35 */}
+              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground">
                 {confidenceLabel}
               </span>
             </div>
 
             {/* Data sources */}
             <div className="px-4 pt-1 pb-3">
-              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground/35 block mb-2">
+              {/* WCAG: full token — was /35 */}
+              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground block mb-2">
                 {sourcesLabel}
               </span>
               <div className="divide-y divide-border/20">
                 {dataSources.map((src, i) => (
                   <div key={i} className="flex items-center gap-2.5 py-1.5">
-                    <div className={`w-1 h-1 rounded-full flex-shrink-0 bg-cot-step opacity-50`} />
-                    <span className="text-[11px] text-foreground/60 leading-snug">{src}</span>
+                    <div className="w-1 h-1 rounded-full flex-shrink-0 bg-cot-step" />
+                    {/* WCAG: muted-foreground — was text-foreground/60 (~9:1×0.6≈5.4, borderline; now full ~7:1) */}
+                    <span className="text-[11px] text-muted-foreground leading-snug">{src}</span>
                   </div>
                 ))}
               </div>

@@ -1,0 +1,3 @@
+- [SVG gauge overflow](svg-gauge-overflow.md) — half-arch SVG gauge with overflow:visible + overflow-hidden parent silently breaks on real devices; use circular ring instead.
+- [DS theme scoping](ds-theme-scoping.md) — DS page needs both [data-ds-theme="light"] AND [data-ds-theme="dark"] overrides or the dark toggle has no effect when the app is in light mode.
+- [WCAG opacity floor](wcag-opacity-floor.md) — any opacity modifier below /80 on muted-foreground (or /70 on foreground) fails AA at small text sizes; remove all such modifiers from pattern components.
