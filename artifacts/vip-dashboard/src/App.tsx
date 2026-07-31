@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "wouter";
-import { Shield, Briefcase, Calendar, BarChart3, Settings, X, Check, Loader2, Layers, Sun, Moon } from "lucide-react";
+import { Shield, Briefcase, Calendar, BarChart3, Settings, X, Check, Loader2, Layers, Sun, Moon, Menu, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetMcpFeed } from "@workspace/api-client-react";
 import type { McpAlert } from "@workspace/api-client-react";
@@ -536,6 +536,7 @@ export default function App() {
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [approvalState, setApprovalState] = useState<ApprovalState>("idle");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const activeAlerts = (allAlerts ?? []).filter((a) => !dismissedIds.has(a.id));
   const visibleAlerts = activeAlerts.slice(0, VISIBLE_COUNT);
@@ -570,8 +571,8 @@ export default function App() {
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden text-foreground selection:bg-primary selection:text-primary-foreground">
 
-      {/* Sidebar */}
-      <aside className="w-[220px] flex-shrink-0 bg-sidebar border-e border-sidebar-border flex flex-col justify-between z-10">
+      {/* ── Desktop sidebar — hidden on mobile ─────────────────────────────── */}
+      <aside className="hidden md:flex md:w-[220px] flex-shrink-0 bg-sidebar border-e border-sidebar-border flex-col justify-between z-10">
         <div>
           <div className="h-16 flex items-center px-6 border-b border-sidebar-border/50">
             <h1 className="font-semibold tracking-widest text-sm uppercase text-foreground">
@@ -597,7 +598,6 @@ export default function App() {
           </nav>
         </div>
         <div className="p-4 border-t border-sidebar-border/50 space-y-1">
-          {/* Design System shortcut */}
           <Link
             href="/design-system"
             className="flex items-center gap-3 px-3 py-2 rounded-sm text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors w-full"
@@ -605,7 +605,6 @@ export default function App() {
             <Layers className="w-4 h-4 flex-shrink-0" />
             <span>Design System</span>
           </Link>
-          {/* User profile row */}
           <div className="flex items-center gap-3 px-2 py-2">
             <div className="w-8 h-8 rounded-full bg-border flex items-center justify-center overflow-hidden flex-shrink-0">
               <span className="text-xs font-semibold text-muted-foreground">JD</span>
@@ -618,17 +617,92 @@ export default function App() {
         </div>
       </aside>
 
+      {/* ── Mobile sidebar overlay ──────────────────────────────────────────── */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          {/* Drawer panel */}
+          <aside className="w-[260px] flex-shrink-0 bg-sidebar border-e border-sidebar-border flex flex-col justify-between">
+            <div>
+              <div className="h-16 flex items-center justify-between px-5 border-b border-sidebar-border/50">
+                <h1 className="font-semibold tracking-widest text-sm uppercase text-foreground">
+                  {t.appName}
+                </h1>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label="Close navigation"
+                  className="w-8 h-8 flex items-center justify-center rounded-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <nav className="p-4 space-y-1">
+                {navItemDefs.map((item) => (
+                  <a
+                    key={item.key}
+                    href="#"
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-sm text-[14px] font-medium transition-colors ${
+                      item.active
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4 flex-shrink-0" />
+                    {t.nav[item.key]}
+                  </a>
+                ))}
+              </nav>
+            </div>
+            <div className="p-4 border-t border-sidebar-border/50 space-y-1">
+              <Link
+                href="/design-system"
+                onClick={() => setSidebarOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-sm text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors w-full"
+              >
+                <Layers className="w-4 h-4 flex-shrink-0" />
+                <span>Design System</span>
+              </Link>
+              <div className="flex items-center gap-3 px-2 py-2">
+                <div className="w-8 h-8 rounded-full bg-border flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <span className="text-xs font-semibold text-muted-foreground">JD</span>
+                </div>
+                <div className="flex flex-col overflow-hidden">
+                  <span className="text-xs font-medium text-foreground truncate">J. Doe</span>
+                  <span className="text-[10px] text-muted-foreground truncate">{t.userRole}</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+          {/* Backdrop */}
+          <div
+            className="flex-1 bg-black/60 backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
+        </div>
+      )}
+
       {/* Main workspace */}
       <div className="flex-1 flex overflow-hidden">
 
         {/* Card list column */}
         <main
-          className={`flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out ${
-            panelOpen ? "w-[42%]" : "w-full"
+          className={`flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out w-full ${
+            panelOpen ? "md:w-[42%]" : ""
           }`}
         >
-          {/* Header — locale + theme toggles */}
-          <header className="h-16 flex-shrink-0 flex items-center px-6 lg:px-10 border-b border-transparent">
+          {/* Header — hamburger (mobile) + locale + theme toggles */}
+          <header className="h-16 flex-shrink-0 flex items-center px-4 md:px-6 lg:px-10 border-b border-transparent">
+            {/* Mobile: hamburger + brand */}
+            <button
+              className="md:hidden flex items-center justify-center w-9 h-9 rounded-sm text-muted-foreground hover:text-foreground transition-colors me-2"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open navigation"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <span className="md:hidden font-semibold tracking-widest text-sm uppercase text-foreground flex-1 truncate">
+              {t.appName}
+            </span>
             <div className="ms-auto flex items-center gap-1">
               {/* Locale toggle */}
               <button
@@ -670,7 +744,7 @@ export default function App() {
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto px-6 lg:px-10 pb-24">
+          <div className="flex-1 overflow-y-auto px-4 md:px-6 lg:px-10 pb-24">
             <div
               className={`mx-auto pt-8 transition-all duration-300 ${panelOpen ? "max-w-none" : "max-w-3xl"}`}
             >
@@ -744,10 +818,35 @@ export default function App() {
           </div>
         </main>
 
-        {/* Detail panel */}
+        {/* ── Mobile detail panel — full-screen overlay ──────────────────── */}
+        {panelOpen && selectedAlert && (
+          <div className="md:hidden fixed inset-0 z-40 flex flex-col bg-sidebar">
+            {/* Mobile back bar */}
+            <div className="flex-shrink-0 h-14 flex items-center px-4 border-b border-sidebar-border/50">
+              <button
+                onClick={handleClose}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span className="text-[13px] font-medium">Back</span>
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <DetailPanel
+                alert={selectedAlert}
+                onClose={handleClose}
+                onApprove={handleApprove}
+                approvalState={approvalState}
+                t={t}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ── Desktop detail panel — inline side panel with width animation ── */}
         <div
-          className={`flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${
-            panelOpen ? "w-[58%] opacity-100" : "w-0 opacity-0"
+          className={`hidden md:block flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${
+            panelOpen ? "md:w-[58%] md:opacity-100" : "md:w-0 md:opacity-0"
           }`}
         >
           {selectedAlert && (
