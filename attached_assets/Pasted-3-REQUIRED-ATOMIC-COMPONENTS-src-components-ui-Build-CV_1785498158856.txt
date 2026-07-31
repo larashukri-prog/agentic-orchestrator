@@ -1,0 +1,49 @@
+3. REQUIRED ATOMIC COMPONENTS (src/components/ui/)
+Build CVA variants for the following core primitives:
+
+button.tsx (Variants: default, secondary, outline, ghost, staged, approved; Sizes: default [44px], sm [32px]).
+
+badge.tsx (Variants: default, secondary, outline, reasoning, confidence, staged).
+
+card.tsx (Composable slots: CardHeader, CardTitle, CardDescription, CardContent, CardFooter).
+
+input.tsx & label.tsx (Linked with accessible htmlFor/id and error states).
+
+switch.tsx & checkbox.tsx (Full keyboard operability and target size compliance).
+
+🛡️ 4. ENTERPRISE AGENTIC PATTERNS (src/components/patterns/)
+Compose the atomic primitives into three key Agentic Orchestrator patterns:
+
+Chain-of-Thought (CoT) Audit Drawer:
+
+Side panel showing step-by-step reasoning logs, raw data sources (SEC filings, flight telemetry), and a confidence score progress bar.
+
+Human-in-the-Loop (HITL) Staging Card:
+
+Staging card displaying a pre-drafted agentic action (e.g., VIP suite upgrade or donor outreach) with quick action controls: Inspect, Modify Text, Approve & Execute, Reject.
+
+Rule-of-Three Interventions Container:
+
+A constrained feed component that explicitly caps displayed agentic recommendations to 3 active items to enforce cognitive guardrails.
+
+⚡ 5. MIDDLE-LAYER HOOKS (src/lib/)
+Create reusable hooks to keep UI components declarative:
+
+useLocalStorageState.ts: Handles preference persistence (dark mode, density toggle) with private browsing fallback.
+
+useAgenticOrchestrator.ts: Manages simulated MCP feeds, staged actions queue, CoT visibility state, and approval/rejection mutations.
+
+🖥️ 6. LIVE SHOWCASE PAGE (src/pages/DesignSystemPage.tsx or /design-system)
+Create a complete, interactive Design System Showcase page featuring:
+
+Header: System title, theme toggle (Light/Dark), and Density contract toggle (Comfortable/Compact).
+
+Section 01 — Foundations: Swatches for core canvas tokens, agentic status tokens, typography scale, 4px grid rules, and contrast verification tables.
+
+Section 02 — Atoms: Live interactive showcase of Buttons, Badges, Inputs, Switches, and Cards across all states (Hover, Focus, Active, Disabled).
+
+Section 03 — Patterns: Interactive demos of the Chain-of-Thought Drawer, HITL Staging Card, and Rule-of-Three container with live state updates.
+
+Section 04 — Motion & Feedback: Animated toast notifications, spring progress bars, and skeleton loading states under framer-motion.
+
+Ensure all code is completely written out, fully typed in TypeScript, and free of placeholder comments.

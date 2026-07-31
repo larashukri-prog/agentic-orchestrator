@@ -1,0 +1,108 @@
+You are an expert Principal Design Engineer tasked with architecting a production-grade, machine-legible, token-driven Design System for "Cognitive Scaffold" (Agentic Orchestrator). 
+
+Target Application: https://cognitive-scaffold.replit.app/
+Core Domain: Enterprise Agentic AI, Model Context Protocol (MCP) data governance, and Human-in-the-Loop (HITL) trust interfaces.
+
+Refactor and build out the codebase following the strict design system rules below.
+
+---
+
+### 🎯 1. ARCHITECTURAL CONSTRAINTS & CORE RULES
+
+1. **Zero Bespoke CSS & Zero Hex Hardcoding:**
+   - All colors MUST be defined once as OKLCH tokens in `src/styles.css` and consumed via Tailwind CSS v4 `@theme inline` utilities.
+   - Never write raw hex values (e.g., `#007acc`), raw OKLCH values, or arbitrary Tailwind classes (e.g., `bg-[#1a1a1a]`) inside component files.
+
+2. **Contrast & The `-text` Alias Rule (WCAG 2.1 AA):**
+   - Every vivid accent token MUST have a paired high-contrast `-text` alias token for light theme rendering.
+   - Light theme `-text` tokens must measure $\ge 4.5:1$ against `--background` and `--card`.
+   - In `.dark`, `-text` tokens point directly back to the vivid accent tokens.
+
+3. **The Density Contract (4px Grid):**
+   - **Comfortable Density (Default):** All interactive daily surfaces MUST use `h-11` (44px target), `py-3`, `gap-3`.
+   - **Compact Density (Audit/Backlog Only):** Data-dense views use `h-8`, `py-1`, `gap-1.5`.
+   - **Rule:** Density toggles MUST ONLY swap 4px grid multipliers on the same component—NEVER fork or duplicate components for dense variants.
+
+4. **Component Isolation (CVA + shadcn Patterns):**
+   - Build all atomic components using `class-variance-authority` (cva), `clsx`, and `tailwind-merge`.
+   - All interactive elements must enforce `focus-visible:ring-2`, keyboard accessibility (Space/Enter), and `motion-reduce:transition-none`.
+
+5. **Middle-Layer Architecture:**
+   - Components MUST remain strictly presentational (render props, emit callbacks).
+   - Side effects, state persistence, local storage, and simulation feeds MUST be encapsulated in custom React hooks in `src/lib/`.
+
+---
+
+### 🎨 2. TOKEN DEFINITION (`src/styles.css`)
+
+Configure `src/styles.css` using Tailwind CSS v4 syntax:
+
+```css
+@import "tailwindcss";
+
+:root {
+  /* Canvas & Base Tokens */
+  --background: oklch(0.985 0.003 250);
+  --foreground: oklch(0.22 0.02 270);
+  --card: oklch(0.995 0.002 250);
+  --card-foreground: oklch(0.22 0.02 270);
+  --primary: oklch(0.505 0.18 200);
+  --primary-foreground: oklch(0.985 0.003 250);
+  --secondary: oklch(0.94 0.01 250);
+  --muted: oklch(0.95 0.008 250);
+  --muted-foreground: oklch(0.45 0.02 270);
+  --border: oklch(0.9 0.01 260);
+
+  /* Agentic System Status Accents */
+  --agent-reasoning: oklch(0.72 0.24 320);       /* CoT Magenta */
+  --agent-reasoning-text: oklch(0.45 0.22 320);  /* 4.5:1 AA Light */
+  --agent-confidence: oklch(0.78 0.2 195);       /* Cyan */
+  --agent-confidence-text: oklch(0.45 0.2 195);
+  
+  /* HITL Governance Accents */
+  --hitl-staged: oklch(0.75 0.18 85);            /* Warning Amber */
+  --hitl-staged-text: oklch(0.48 0.18 85);
+  --hitl-approved: oklch(0.72 0.2 145);          /* Success Emerald */
+  --hitl-approved-text: oklch(0.42 0.18 145);
+}
+
+.dark {
+  --background: oklch(0.14 0.02 270);
+  --foreground: oklch(0.96 0.01 250);
+  --card: oklch(0.19 0.025 270);
+  --card-foreground: oklch(0.96 0.01 250);
+  --primary: oklch(0.78 0.18 180);
+  --primary-foreground: oklch(0.14 0.02 270);
+  --secondary: oklch(0.25 0.03 270);
+  --muted: oklch(0.22 0.025 270);
+  --muted-foreground: oklch(0.65 0.02 250);
+  --border: oklch(0.28 0.03 270);
+
+  /* Dark mode mappings point to vivid fills */
+  --agent-reasoning-text: var(--agent-reasoning);
+  --agent-confidence-text: var(--agent-confidence);
+  --hitl-staged-text: var(--hitl-staged);
+  --hitl-approved-text: var(--hitl-approved);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+
+  --color-agent-reasoning: var(--agent-reasoning);
+  --color-agent-reasoning-text: var(--agent-reasoning-text);
+  --color-agent-confidence: var(--agent-confidence);
+  --color-agent-confidence-text: var(--agent-confidence-text);
+  --color-hitl-staged: var(--hitl-staged);
+  --color-hitl-staged-text: var(--hitl-staged-text);
+  --color-hitl-approved: var(--hitl-approved);
+  --color-hitl-approved-text: var(--hitl-approved-text);
+}
