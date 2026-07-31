@@ -260,21 +260,25 @@ function AlertCard({
 /* ─── Confidence gauge SVG ────────────────────────────────────────────────── */
 
 function ConfidenceGauge({ score, gaugeColor }: { score: number; gaugeColor: string }) {
+  // sweep-flag=1 → clockwise → arc curves UPWARD (arch shape, apex at y≈4).
+  // sweep-flag=0 was counterclockwise → downward U-cup that bled below the SVG
+  // element via overflow:visible and overlapped the label. Fixed by flipping the flag
+  // and removing overflow:visible so the SVG clips to its own bounds.
   const r = 22;
   const cx = 28;
-  const cy = 28;
+  const cy = 28; // arc endpoints sit at y=28; viewBox starts at y=2 → rendered y=26
   const halfCirc = Math.PI * r;
   const filled = (score / 100) * halfCirc;
-  const path = `M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`;
+  const path = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
 
   return (
-    <div className="relative flex flex-col items-center justify-end" style={{ width: 56, height: 38 }}>
+    // height=48: arc endpoints at rendered y≈26, score text at bottom ≈ y=34–48 → 8px gap
+    <div className="relative flex flex-col items-center justify-end" style={{ width: 56, height: 48 }}>
       <svg
         width="56"
         height="26"
         viewBox="0 2 56 26"
         className="absolute top-0"
-        style={{ overflow: "visible" }}
       >
         <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" className="text-foreground/10" />
         <path d={path} fill="none" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor"
