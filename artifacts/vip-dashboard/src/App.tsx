@@ -357,8 +357,8 @@ function DetailPanel({
         {/* ── Eval Literacy trust block ─────────────────── */}
         <div className="rounded-sm border border-border/40 bg-background/40 overflow-hidden">
           {/* Header row */}
-          <div className="flex items-end justify-between gap-4 px-4 pt-4 pb-3 border-b border-border/25">
-            <div className="space-y-1 min-w-0">
+          <div className="flex items-end justify-between gap-2 px-4 pe-3 pt-4 pb-3 border-b border-border/25">
+            <div className="space-y-1 min-w-0 flex-1">
               {/* Raised from /60 → full muted-foreground ✓ */}
               <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
                 {t.panel.evalLiteracy}
@@ -368,10 +368,12 @@ function DetailPanel({
                 {t.panel.chainOfThought}
               </p>
             </div>
-            <div className="flex-shrink-0 flex flex-col items-center gap-1">
+            {/* min-w-[90px] prevents the CONFIDENCE label from overflowing the
+                overflow-hidden parent block on narrow mobile screens */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-1 min-w-[90px]">
               <ConfidenceGauge score={alert.confidenceScore} gaugeColor={style.gauge} />
-              {/* Raised from /35 → muted-foreground ✓ */}
-              <span className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground">
+              {/* tracking-wide (not widest) keeps the label within the 90px column */}
+              <span className="font-mono text-[9px] tracking-wide uppercase text-muted-foreground">
                 {t.panel.confidence}
               </span>
             </div>
