@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "wouter";
-import { Shield, Briefcase, Calendar, BarChart3, Settings, X, Check, Loader2, Layers, Sun, Moon, Menu, ChevronLeft, ChevronDown } from "lucide-react";
+import { Shield, Briefcase, Calendar, BarChart3, Settings, X, Check, Loader2, Layers, Sun, Moon, Menu, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetMcpFeed } from "@workspace/api-client-react";
 import type { McpAlert } from "@workspace/api-client-react";
@@ -331,30 +331,9 @@ function DetailPanel({
   const urgencyLabel = t.urgency[alert.urgency] ?? alert.urgency.toUpperCase();
   const [draft, setDraft] = useState(() => alert.actionPayload);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const scrollBodyRef = useRef<HTMLDivElement>(null);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-
-  const checkScroll = () => {
-    const el = scrollBodyRef.current;
-    if (!el) return;
-    const hasOverflow = el.scrollHeight > el.clientHeight + 2;
-    const atBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 8;
-    setShowScrollIndicator(hasOverflow && !atBottom);
-  };
 
   useEffect(() => {
     setDraft(alert.actionPayload);
-  }, [alert.id]);
-
-  // Re-check overflow whenever the selected alert changes or the panel resizes
-  useEffect(() => {
-    checkScroll();
-    const el = scrollBodyRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(checkScroll);
-    ro.observe(el);
-    return () => ro.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alert.id]);
 
   return (
@@ -388,20 +367,8 @@ function DetailPanel({
         </button>
       </div>
 
-      {/* Scrollable body — wrapped in a relative container for the scroll indicator */}
-      <div className="flex-1 relative min-h-0">
-        {/* Gradient + chevron scroll indicator */}
-        <div
-          aria-hidden="true"
-          className={`pointer-events-none absolute bottom-0 inset-x-0 z-10 h-16 flex items-end justify-center pb-2 transition-opacity duration-300 ${
-            showScrollIndicator ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ background: "linear-gradient(to bottom, transparent, var(--sidebar))" }}
-        >
-          <ChevronDown className="w-4 h-4 text-muted-foreground animate-bounce" />
-        </div>
-
-      <div ref={scrollBodyRef} onScroll={checkScroll} className="h-full overflow-y-auto px-6 py-5 space-y-5">
+      {/* Scrollable body */}
+      <div className="flex-1 overflow-y-auto detail-panel-scroll px-6 py-5 space-y-5">
         <div className="space-y-1.5">
           {/* Labels: raised from /60 → full muted-foreground ✓ */}
           <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
@@ -496,7 +463,6 @@ function DetailPanel({
           />
         </div>
       </div>
-      </div>{/* end scroll body wrapper */}
 
       {/* Approval buttons */}
       <div className="flex-shrink-0 px-6 py-5 border-t border-sidebar-border/50 space-y-3">
