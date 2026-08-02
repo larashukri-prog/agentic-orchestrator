@@ -331,9 +331,36 @@ function DetailPanel({
   const urgencyLabel = t.urgency[alert.urgency] ?? alert.urgency.toUpperCase();
   const [draft, setDraft] = useState(() => alert.actionPayload);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollBodyRef = useRef<HTMLDivElement>(null);
+  const [thumb, setThumb] = useState({ top: 0, height: 100 });
+
+  const updateThumb = () => {
+    const el = scrollBodyRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const rawHeightPct = (clientHeight / scrollHeight) * 100;
+    const height = Math.min(Math.max(rawHeightPct, 8), 100); // clamp [8, 100]
+    // Use scrollable range so top + height never exceeds 100
+    const scrollableRange = scrollHeight - clientHeight;
+    const top = scrollableRange > 0
+      ? (scrollTop / scrollableRange) * (100 - height)
+      : 0;
+    setThumb({ top: Math.min(top, 100 - height), height });
+  };
 
   useEffect(() => {
     setDraft(alert.actionPayload);
+  }, [alert.id]);
+
+  // Recompute thumb whenever the selected alert changes or the panel resizes
+  useEffect(() => {
+    updateThumb();
+    const el = scrollBodyRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(updateThumb);
+    ro.observe(el);
+    return () => ro.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alert.id]);
 
   return (
@@ -367,8 +394,21 @@ function DetailPanel({
         </button>
       </div>
 
-      {/* Scrollable body */}
-      <div className="flex-1 overflow-y-auto detail-panel-scroll px-6 py-5 space-y-5">
+      {/* Scrollable body — relative wrapper holds the custom always-visible track */}
+      <div className="flex-1 relative min-h-0">
+
+        {/* Custom scroll track: always visible, thumb proportional to scroll position */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-1.5 top-3 bottom-3 w-[3px] rounded-full bg-muted-foreground/[0.12] z-10"
+        >
+          <div
+            className="absolute inset-x-0 rounded-full bg-muted-foreground/40 transition-[top,height] duration-75"
+            style={{ top: `${thumb.top}%`, height: `${thumb.height}%` }}
+          />
+        </div>
+
+      <div ref={scrollBodyRef} onScroll={updateThumb} className="h-full overflow-y-auto detail-panel-scroll px-6 py-5 space-y-5">
         <div className="space-y-1.5">
           {/* Labels: raised from /60 → full muted-foreground ✓ */}
           <span className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
@@ -463,6 +503,7 @@ function DetailPanel({
           />
         </div>
       </div>
+      </div>{/* end scroll wrapper */}
 
       {/* Approval buttons */}
       <div className="flex-shrink-0 px-6 py-5 border-t border-sidebar-border/50 space-y-3">
