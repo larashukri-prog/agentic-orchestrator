@@ -14,7 +14,7 @@ A high-fidelity functional prototype exploring **Anticipatory Agentic AI with Ma
 * **Human-in-the-Loop (HITL) Guardrails:** Replaces zero-click execution with a mandatory staging boundary, allowing operators to review, modify, or reject proposed actions before dispatch.
 * **"Rule of Three" Cognitive Constraint:** Deliberately limits the active recommendation queue to three high-impact interventions at a time, reducing decision overload and helping executives focus on the most consequential actions.
 * **Controlled Execution Pattern:** Consequential actions are staged for human review before execution, creating an explicit control point rather than allowing the agent to act autonomously.
-* * **Confidence & Risk Signals:** Uses confidence and risk indicators to help prioritize candidate actions before human review, without treating model confidence as a substitute for human judgment.
+* **Confidence & Risk Signals:** Uses confidence and risk indicators to help prioritize candidate actions before human review, without treating model confidence as a substitute for human judgment.
 ---
 
 ## 🛠️ Tech Stack & Methods
