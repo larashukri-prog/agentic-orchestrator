@@ -32,8 +32,10 @@ A high-fidelity functional prototype exploring **Anticipatory Agentic AI with Ma
 ### Human Boundary
 
 The prototype models a hard human boundary: the agent can recommend and stage an action, but it cannot independently cross the execution boundary.
+
 **Agent Recommendation → Decision Evidence → Human Review → Approval / Edit / Reject → Execution**
-The human boundary sits between reasoning and execution — never after it.
+
+The human boundary sits between recommendation and execution — never after it.
 
 ### Trust as a System Property
 
