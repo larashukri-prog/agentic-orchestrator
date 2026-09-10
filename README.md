@@ -14,8 +14,7 @@ A high-fidelity functional prototype exploring **Anticipatory Agentic AI with Ma
 * **Human-in-the-Loop (HITL) Guardrails:** Replaces zero-click execution with a mandatory staging boundary, allowing operators to review, modify, or reject proposed actions before dispatch.
 * **"Rule of Three" Cognitive Constraint:** Deliberately limits the active recommendation queue to three high-impact interventions at a time, reducing decision overload and helping executives focus on the most consequential actions.
 * **Reversible Execution Pattern:** Consequential mutations are modeled as reversible actions, creating an explicit recovery path rather than treating execution as an irreversible state change.
-* **Confidence & Risk Gating:** Candidate actions pass through a confidence/risk gating layer before entering the human review queue, helping prioritize attention without replacing human judgment.
-
+* **Confidence & Risk Signals:** Uses confidence and risk indicators to help prioritize candidate actions before human review, without treating model confidence as a substitute for human judgment.
 ---
 
 ## 🛠️ Tech Stack & Methods
@@ -32,10 +31,8 @@ A high-fidelity functional prototype exploring **Anticipatory Agentic AI with Ma
 
 ### Human Boundary
 
-The agent can recommend and stage an action, but it cannot independently cross the execution boundary.
-
-**Reasoning → Evidence → Human Review → Approval / Edit / Reject → Execution**
-
+The prototype models a hard human boundary: the agent can recommend and stage an action, but it cannot independently cross the execution boundary.
+**Agent Recommendation → Decision Evidence → Human Review → Approval / Edit / Reject → Execution**
 The human boundary sits between reasoning and execution — never after it.
 
 ### Trust as a System Property
